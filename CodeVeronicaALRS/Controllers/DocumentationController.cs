@@ -27,7 +27,7 @@ namespace ALRS.Controllers
                         Controller = x.RouteValues["controller"],
                         Route = x.AttributeRouteInfo.Template,
                         Methods = x.ActionConstraints != null ?
-                            string.Join(", ", x.ActionConstraints.Select(ac => ac.GetType().Name)) : "GET", // Default to GET
+                            string.Join(", ", x.ActionConstraints.Select(ac => ac.GetType().Name)) : "GET",
                         Parameters = GetParameters(x.RouteValues["controller"], x.RouteValues["action"])
                     })
                     .ToList();
