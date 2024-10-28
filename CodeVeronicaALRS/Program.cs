@@ -9,6 +9,7 @@ using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Serilog.Settings.Configuration;
+using CodeVeronicaALRS.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +67,33 @@ builder.Services.AddSwaggerGen(c =>
             new string[] { }
         }
     });
+
+
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key needed to access the endpoints. X-API-KEY: {your_api_key}",
+        In = ParameterLocation.Header,
+        Name = "X-API-KEY",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "ApiKeyScheme"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+    {
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "ApiKey"
+            },
+            Scheme = "ApiKeyScheme",
+            Name = "X-API-KEY",
+            In = ParameterLocation.Header
+        },
+        new List<string>()
+    }});
+
 });
 
 builder.Services.AddCors(options =>
@@ -134,8 +162,9 @@ var app = builder.Build();
 
 app.UseCors("AllowAllOrigins");
 
+app.UseMiddleware<ApiKeyMiddleware>();
 app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthorization(); 
 
 using (var scope = app.Services.CreateScope())
 {
