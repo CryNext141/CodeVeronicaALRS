@@ -13,6 +13,7 @@ namespace ALRS.Data
         }
 
         public DbSet<Alerts> Alerts { get; set; }
+        public DbSet<KidnapperDetailsAlerts> KidnapperDetailsAlerts { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
         public DbSet<UserSubmittedAlert> UserSubmittedAlerts { get; set; }
         public DbSet<KidnapperDetails> KidnapperDetails { get; set; }

@@ -33,10 +33,9 @@ namespace ALRS.Controllers
 
                 var childAlert = new UserSubmittedAlert
                 {
-                    VictimName = childDto.VictimName,
-                    VictimAge = childDto.VictimAge,
                     CrimeLocation = childDto.CrimeLocation,
-                    CrimeDate = childDto.CrimeDate
+                    CrimeDate = childDto.CrimeDate,
+                    VictimLook = childDto.VictimLook
                 };
 
                 _context.UserSubmittedAlerts.Add(childAlert);
@@ -69,7 +68,7 @@ namespace ALRS.Controllers
                 kidnapperDto.KidnapperName = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperName) ? "Unknown" : kidnapperDto.KidnapperName;
                 kidnapperDto.KidnapperAge = kidnapperDto.KidnapperAge == 0 ? (int?)0 : kidnapperDto.KidnapperAge;
                 kidnapperDto.KidnapperSex = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperSex) ? "Unknown" : kidnapperDto.KidnapperSex;
-                kidnapperDto.KidnapperClothes = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperClothes) ? "Unknown" : kidnapperDto.KidnapperClothes;
+                kidnapperDto.KidnapperLook = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperLook) ? "Unknown" : kidnapperDto.KidnapperLook;
                 kidnapperDto.KidnapperVehicle = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperVehicle) ? "Unknown" : kidnapperDto.KidnapperVehicle;
 
                 var kidnapperDetails = new KidnapperDetails
@@ -77,7 +76,7 @@ namespace ALRS.Controllers
                     KidnapperName = kidnapperDto.KidnapperName,
                     KidnapperAge = kidnapperDto.KidnapperAge,
                     KidnapperSex = kidnapperDto.KidnapperSex,
-                    KidnapperClothes = kidnapperDto.KidnapperClothes,
+                    KidnapperLook = kidnapperDto.KidnapperLook,
                     KidnapperVehicle = kidnapperDto.KidnapperVehicle
                 };
 
@@ -95,5 +94,4 @@ namespace ALRS.Controllers
             }
         }
     }
-
 }
