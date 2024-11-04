@@ -12,6 +12,7 @@ using System.Text;
 
 namespace ALRS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -31,6 +32,7 @@ namespace ALRS.Controllers
             _context = context;
         }
 
+        [Authorize(Roles = "0")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
@@ -94,6 +96,7 @@ namespace ALRS.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
@@ -128,8 +131,7 @@ namespace ALRS.Controllers
                 return Ok(new
                 {
                     token,
-                    login = user.LoginWithIdentifier,
-                    role = user.Role
+
                 });
             }
             catch (Exception ex)

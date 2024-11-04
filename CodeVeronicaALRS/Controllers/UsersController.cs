@@ -19,7 +19,7 @@ namespace ALRS.Controllers
             _logger = logger;
         }
 
-        //[Authorize(Roles = "0")]
+        [Authorize(Roles = "1")]
         [HttpGet("users")]
         public async Task<List<Users>> GetAllUsers()
         {

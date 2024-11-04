@@ -1,12 +1,14 @@
 ﻿using ALRS.Data;
+using ALRS.DTO;
 using ALRS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace ALRS.Controllers
 {
+    [AllowAnonymous]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertsController : ControllerBase
@@ -22,14 +24,38 @@ namespace ALRS.Controllers
 
         [Authorize(Roles = "1")]
         [HttpPost("alert/create")]
-        public async Task<IActionResult> CreateAlert([FromBody] Alerts alert)
+        public async Task<IActionResult> CreateAlert([FromBody] CreateAlertDto dto)
         {
-            _logger.LogInformation("Entering {Action} with alert data: {@Alert}", nameof(CreateAlert), alert);
+            _logger.LogInformation("Entering {Action} with alert data: {@Dto}", nameof(CreateAlert), dto);
 
             try
             {
+                var alert = new Alerts
+                {
+                    VictimName = dto.VictimName,
+                    VictimAge = dto.VictimAge,
+                    CrimeLocation = dto.CrimeLocation,
+                    CrimeDate = dto.CrimeDate,
+                    CrimeStatus = dto.CrimeStatus
+                };
+
                 _context.Alerts.Add(alert);
                 await _context.SaveChangesAsync();
+
+                var kidnapperDetails = new KidnapperDetailsAlerts
+                {
+                    KidnapperName = string.IsNullOrWhiteSpace(dto.KidnapperName) ? "Unknown" : dto.KidnapperName,
+                    KidnapperAge = dto.KidnapperAge == 0 ? (int)0 : dto.KidnapperAge,
+                    KidnapperSex = string.IsNullOrWhiteSpace(dto.KidnapperSex) ? "Unknown" : dto.KidnapperSex,
+                    KidnapperLook = string.IsNullOrWhiteSpace(dto.KidnapperLook) ? "Unknown look" : dto.KidnapperLook,
+                    KidnapperVehicle = string.IsNullOrWhiteSpace(dto.KidnapperVehicle) ? "Unknown vehicle" : dto.KidnapperVehicle,
+                    AlertsId = alert.Id,
+                    Alerts = alert
+                };
+
+                _context.KidnapperDetailsAlerts.Add(kidnapperDetails);
+                await _context.SaveChangesAsync();
+
 
                 _logger.LogInformation("Alert created successfully: {@Alert}", alert);
 
@@ -43,6 +69,37 @@ namespace ALRS.Controllers
             {
                 _logger.LogError(ex, "An error occurred while creating an alert.");
                 return StatusCode(500, new { message = "An error occurred while creating alerts.", error = ex.Message });
+            }
+        }
+
+
+        [Authorize(Roles = "1")]
+        [HttpGet("alert/{id}")]
+        public async Task<IActionResult> GetAlert(int id)
+        {
+            _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlert), id);
+
+
+            try
+            {
+                var alert = await _context.Alerts
+                                   .Include(a => a.KidnapperDetailsAlerts)
+                                   .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (alert == null)
+                {
+                    _logger.LogWarning("Alert with ID {AlertId} not found.", id);
+                    return NotFound();
+                }
+
+                _logger.LogInformation("Alert with ID {AlertId} retrieved successfully.", id);
+                return Ok(alert);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating alert with ID {AlertId}.", id);
+                return StatusCode(500, new { message = "An error occurred while updating alerts.", error = ex.Message });
             }
         }
 
@@ -60,6 +117,8 @@ namespace ALRS.Controllers
                     _logger.LogWarning("Alert with ID {AlertId} not found.", id);
                     return NotFound();
                 }
+
+                _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
                 existingAlert.VictimName = alert.VictimName;
                 existingAlert.VictimAge = alert.VictimAge;
@@ -79,6 +138,8 @@ namespace ALRS.Controllers
             }
         }
 
+
+        [Authorize(Roles = "1")]
         [HttpPatch("alerts/{id}/close")]
         public async Task<IActionResult> CloseAlert(int id)
         {
@@ -93,11 +154,17 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
+                if (alert.CrimeStatus == 0)
+                {
+                    _logger.LogInformation("Alert with ID {AlertsId} already closed.", id);
+                    return Ok("Alert dont need to be closed");
+                }
+
                 alert.CrimeStatus = 0;
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert with ID {AlertId} closed successfully.", id);
-                return Ok(alert);
+                return Ok($"Alert with ID {alert.Id} successfuly closed, status {alert.CrimeStatus}");
             }
             catch (Exception ex)
             {
@@ -135,7 +202,7 @@ namespace ALRS.Controllers
             }
         }
 
-        [Authorize(Roles = "1")]
+        [AllowAnonymous]
         [HttpGet("alerts")]
         public async Task<IActionResult> GetAllAlerts()
         {
@@ -143,8 +210,11 @@ namespace ALRS.Controllers
 
             try
             {
-                var alerts = await _context.Alerts.ToListAsync();
-                _logger.LogInformation("Retrieved {Count} alerts.", alerts.Count);
+                var alerts = await _context.Alerts
+                    .Include(alert => alert.KidnapperDetailsAlerts)
+                    .ToListAsync();
+
+                _logger.LogInformation("Retrieved {Count} alerts with kidnapper details.", alerts.Count);
                 return Ok(alerts);
             }
             catch (Exception ex)
@@ -155,4 +225,3 @@ namespace ALRS.Controllers
         }
     }
 }
-
