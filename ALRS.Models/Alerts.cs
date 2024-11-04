@@ -1,4 +1,7 @@
-﻿namespace ALRS.Models
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace ALRS.Models
 {
     public class Alerts
     {
@@ -15,11 +18,11 @@
     public class KidnapperDetailsAlerts
     {
         public int Id { get; set; }
-        public string? KidnapperName { get; set; }
-        public int? KidnapperAge { get; set; }
+        public string KidnapperName { get; set; }
+        public int KidnapperAge { get; set; }
         public string KidnapperSex { get; set; }
-        public string? KidnapperLook { get; set; }
-        public string? KidnapperVehicle { get; set; }
+        public string KidnapperLook { get; set; }
+        public string KidnapperVehicle { get; set; }
 
         public int AlertsId { get; set; }
         public Alerts Alerts { get; set; }

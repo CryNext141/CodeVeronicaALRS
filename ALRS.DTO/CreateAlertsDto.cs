@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,11 +15,12 @@ namespace ALRS.DTO
         public string? CrimeDate { get; set; }
         public int CrimeStatus { get; set; }
 
-        public string? KidnapperName { get; set; }
-        public int? KidnapperAge { get; set; }
-        public string? KidnapperSex { get; set; }
-        public string? KidnapperLook { get; set; }
-        public string? KidnapperVehicle { get; set; }
+
+        public string KidnapperName { get; set; }
+        public int KidnapperAge { get; set; }
+        public string KidnapperSex { get; set; }
+        public string KidnapperLook { get; set; }
+        public string KidnapperVehicle { get; set; }
     }
 
 }

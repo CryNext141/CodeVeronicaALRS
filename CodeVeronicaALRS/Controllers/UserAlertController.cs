@@ -65,19 +65,13 @@ namespace ALRS.Controllers
                     return BadRequest(ModelState);
                 }
 
-                kidnapperDto.KidnapperName = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperName) ? "Unknown" : kidnapperDto.KidnapperName;
-                kidnapperDto.KidnapperAge = kidnapperDto.KidnapperAge == 0 ? (int?)0 : kidnapperDto.KidnapperAge;
-                kidnapperDto.KidnapperSex = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperSex) ? "Unknown" : kidnapperDto.KidnapperSex;
-                kidnapperDto.KidnapperLook = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperLook) ? "Unknown" : kidnapperDto.KidnapperLook;
-                kidnapperDto.KidnapperVehicle = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperVehicle) ? "Unknown" : kidnapperDto.KidnapperVehicle;
-
                 var kidnapperDetails = new KidnapperDetails
                 {
-                    KidnapperName = kidnapperDto.KidnapperName,
-                    KidnapperAge = kidnapperDto.KidnapperAge,
-                    KidnapperSex = kidnapperDto.KidnapperSex,
-                    KidnapperLook = kidnapperDto.KidnapperLook,
-                    KidnapperVehicle = kidnapperDto.KidnapperVehicle
+                    KidnapperName = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperName) ? "Unknown" : kidnapperDto.KidnapperName,
+                    KidnapperAge = kidnapperDto.KidnapperAge == 0 ? (int)0 : kidnapperDto.KidnapperAge,
+                    KidnapperSex = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperSex) ? "Unknown" : kidnapperDto.KidnapperSex,
+                    KidnapperLook = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperLook) ? "Unknown" : kidnapperDto.KidnapperLook,
+                    KidnapperVehicle = string.IsNullOrWhiteSpace(kidnapperDto.KidnapperVehicle) ? "Unknown" : kidnapperDto.KidnapperVehicle
                 };
 
                 _context.KidnapperDetails.Add(kidnapperDetails);

@@ -7,9 +7,9 @@
 
 public class KidnapperDto
 {
-    public string KidnapperName { get; set; } = "Unknown";
-    public int? KidnapperAge { get; set; } = 0;
-    public string KidnapperSex { get; set; } = "Unknown";
-    public string KidnapperLook { get; set; } = "Unknown";
-    public string KidnapperVehicle { get; set; } = "Unknown";
+    public string KidnapperName { get; set; }
+    public int KidnapperAge { get; set; }
+    public string KidnapperSex { get; set; }
+    public string KidnapperLook { get; set; }
+    public string KidnapperVehicle { get; set; }
 }

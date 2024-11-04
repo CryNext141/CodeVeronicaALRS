@@ -20,10 +20,10 @@ namespace ALRS.Models
     public class KidnapperDetails
     {
         public int Id { get; set; }
-        public string? KidnapperName { get; set; }
-        public int? KidnapperAge { get; set; }
+        public string KidnapperName { get; set; }
+        public int KidnapperAge { get; set; }
         public string KidnapperSex { get; set; }
-        public string? KidnapperLook { get; set; }
-        public string? KidnapperVehicle { get; set; }
+        public string KidnapperLook { get; set; }
+        public string KidnapperVehicle { get; set; }
     }
 }

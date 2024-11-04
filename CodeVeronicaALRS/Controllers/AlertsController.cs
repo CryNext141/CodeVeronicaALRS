@@ -4,7 +4,6 @@ using ALRS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace ALRS.Controllers
 {
@@ -45,13 +44,13 @@ namespace ALRS.Controllers
 
                 var kidnapperDetails = new KidnapperDetailsAlerts
                 {
-                    KidnapperName = dto.KidnapperName,
-                    KidnapperAge = dto.KidnapperAge,
-                    KidnapperSex = dto.KidnapperSex,
-                    KidnapperLook = dto.KidnapperLook,
-                    KidnapperVehicle = dto.KidnapperVehicle,
-                    AlertsId = alert.Id, 
-                    Alerts = alert 
+                    KidnapperName = string.IsNullOrWhiteSpace(dto.KidnapperName) ? "Unknown" : dto.KidnapperName,
+                    KidnapperAge = dto.KidnapperAge == 0 ? (int)0 : dto.KidnapperAge,
+                    KidnapperSex = string.IsNullOrWhiteSpace(dto.KidnapperSex) ? "Unknown" : dto.KidnapperSex,
+                    KidnapperLook = string.IsNullOrWhiteSpace(dto.KidnapperLook) ? "Unknown look" : dto.KidnapperLook,
+                    KidnapperVehicle = string.IsNullOrWhiteSpace(dto.KidnapperVehicle) ? "Unknown vehicle" : dto.KidnapperVehicle,
+                    AlertsId = alert.Id,
+                    Alerts = alert
                 };
 
                 _context.KidnapperDetailsAlerts.Add(kidnapperDetails);
@@ -132,7 +131,7 @@ namespace ALRS.Controllers
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert with ID {AlertId} closed successfully.", id);
-                return Ok(alert);
+                return Ok($"Alert with ID {alert.Id} successfuly closed, status {alert.CrimeStatus}");
             }
             catch (Exception ex)
             {
