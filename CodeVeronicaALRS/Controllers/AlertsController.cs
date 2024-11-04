@@ -74,6 +74,36 @@ namespace ALRS.Controllers
 
 
         [Authorize(Roles = "1")]
+        [HttpGet("alert/{id}")]
+        public async Task<IActionResult> GetAlert(int id)
+        {
+            _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlert), id);
+
+
+            try
+            {
+                var alert = await _context.Alerts
+                                   .Include(a => a.KidnapperDetailsAlerts)
+                                   .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (alert == null)
+                {
+                    _logger.LogWarning("Alert with ID {AlertId} not found.", id);
+                    return NotFound();
+                }
+
+                _logger.LogInformation("Alert with ID {AlertId} retrieved successfully.", id);
+                return Ok(alert);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating alert with ID {AlertId}.", id);
+                return StatusCode(500, new { message = "An error occurred while updating alerts.", error = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "1")]
         [HttpPut("alert/{id}/update")]
         public async Task<IActionResult> UpdateAlert(int id, [FromBody] Alerts alert)
         {
@@ -87,6 +117,8 @@ namespace ALRS.Controllers
                     _logger.LogWarning("Alert with ID {AlertId} not found.", id);
                     return NotFound();
                 }
+
+                _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
                 existingAlert.VictimName = alert.VictimName;
                 existingAlert.VictimAge = alert.VictimAge;
@@ -105,6 +137,7 @@ namespace ALRS.Controllers
                 return StatusCode(500, new { message = "An error occurred while updating alerts.", error = ex.Message });
             }
         }
+
 
         [Authorize(Roles = "1")]
         [HttpPatch("alerts/{id}/close")]
@@ -192,4 +225,3 @@ namespace ALRS.Controllers
         }
     }
 }
-

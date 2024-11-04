@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ALRS.Models
+﻿namespace ALRS.Models
 {
     public class UserSubmittedAlert
     {
         public int Id { get; set; }
         public string CrimeLocation { get; set; }
         public string CrimeDate { get; set; }
-        public string VictimLook {  get; set; }
+        public string VictimLook { get; set; }
 
     }
 
