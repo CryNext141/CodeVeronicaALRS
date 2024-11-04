@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : Controller
@@ -19,7 +20,7 @@ namespace ALRS.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "1")]
+        [Authorize(Roles = "0")]
         [HttpGet("users")]
         public async Task<List<Users>> GetAllUsers()
         {
@@ -31,7 +32,7 @@ namespace ALRS.Controllers
             return users;
         }
 
-        [Authorize(Roles = "1")]
+        [Authorize(Roles = "0")]
         [HttpGet("user/{id}/show")]
         public async Task<IActionResult> GetUserById(int id)
         {

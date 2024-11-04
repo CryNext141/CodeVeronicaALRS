@@ -22,5 +22,4 @@ namespace ALRS.DTO
         public string KidnapperLook { get; set; }
         public string KidnapperVehicle { get; set; }
     }
-
 }

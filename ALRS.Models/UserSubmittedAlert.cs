@@ -6,9 +6,7 @@
         public string CrimeLocation { get; set; }
         public string CrimeDate { get; set; }
         public string VictimLook { get; set; }
-
     }
-
 
     public class KidnapperDetails
     {

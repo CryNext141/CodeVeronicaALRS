@@ -11,7 +11,6 @@ namespace ALRS.Models
         public string? CrimeLocation { get; set; }
         public string? CrimeDate { get; set; }
         public int CrimeStatus { get; set; }
-
         public KidnapperDetailsAlerts? KidnapperDetailsAlerts { get; set; }
     }
 
@@ -23,7 +22,6 @@ namespace ALRS.Models
         public string KidnapperSex { get; set; }
         public string KidnapperLook { get; set; }
         public string KidnapperVehicle { get; set; }
-
         public int AlertsId { get; set; }
         public Alerts Alerts { get; set; }
     }

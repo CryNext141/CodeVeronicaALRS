@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
-    [AllowAnonymous]
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertsController : ControllerBase
