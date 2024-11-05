@@ -12,6 +12,7 @@ namespace ALRS.Models
         public string? CrimeDate { get; set; }
         public int CrimeStatus { get; set; }
         public KidnapperDetailsAlerts? KidnapperDetailsAlerts { get; set; }
+        public List<UserSubmittedAlert> UserSubmittedAlerts { get; set; } = new List<UserSubmittedAlert>();
     }
 
     public class KidnapperDetailsAlerts

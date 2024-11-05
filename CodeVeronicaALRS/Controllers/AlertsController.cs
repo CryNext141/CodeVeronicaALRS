@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertsController : ControllerBase
@@ -211,6 +212,8 @@ namespace ALRS.Controllers
             {
                 var alerts = await _context.Alerts
                     .Include(alert => alert.KidnapperDetailsAlerts)
+                    .Include(a => a.UserSubmittedAlerts)
+                        .ThenInclude(u => u.KidnapperDetails)
                     .ToListAsync();
 
                 _logger.LogInformation("Retrieved {Count} alerts with kidnapper details.", alerts.Count);
