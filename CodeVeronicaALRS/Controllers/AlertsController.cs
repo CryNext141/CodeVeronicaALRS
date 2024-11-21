@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
-    [AllowAnonymous]
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertsController : ControllerBase
@@ -138,6 +137,7 @@ namespace ALRS.Controllers
             }
         }
 
+        [Authorize(Roles = "1")]
         [HttpGet("alert/{id}/user-reports")]
         public async Task<IActionResult> GetUserReportsForAlert(int id)
         {

@@ -21,7 +21,6 @@ namespace ALRS.Controllers
             _logger = logger;
         }
 
-        [AllowAnonymous]
         [Authorize(Roles = "0")]
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
@@ -37,7 +36,7 @@ namespace ALRS.Controllers
                 var usersDto = users.Select(user => new UserDto
                 {
                     UserId = user.UserId,
-                    Name = user.UserName,
+                    Name = user.Name,
                     LoginWithIdentifier = user.LoginWithIdentifier,
                     Email = user.Email,
                     Role = user.Role
@@ -66,7 +65,17 @@ namespace ALRS.Controllers
                 if (user != null)
                 {
                     _logger.LogInformation("User with ID {UserId} found in {Action}.", id, nameof(GetUserById));
-                    return Ok(user);
+
+                    var userDto = new UserDto
+                    {
+                        UserId = user.UserId,
+                        Name = user.Name,
+                        LoginWithIdentifier = user.LoginWithIdentifier,
+                        Email = user.Email,
+                        Role = user.Role
+                    };
+
+                    return Ok(userDto);
                 }
 
                 _logger.LogWarning("User with ID {UserId} not found in {Action}.", id, nameof(GetUserById));
