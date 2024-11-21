@@ -22,6 +22,7 @@ namespace ALRS.Controllers
             _logger = logger;
         }
 
+
         [Authorize(Roles = "1")]
         [HttpPost("alert/create")]
         public async Task<IActionResult> CreateAlert([FromBody] CreateAlertDto dto)
@@ -30,39 +31,46 @@ namespace ALRS.Controllers
 
             try
             {
-                var alert = new Alerts
+                var alert = new Alert
                 {
-                    VictimName = dto.VictimName,
-                    VictimAge = dto.VictimAge,
-                    CrimeLocation = dto.CrimeLocation,
-                    CrimeDate = dto.CrimeDate,
-                    CrimeStatus = dto.CrimeStatus
+                    AlertStatus = dto.AlertStatus,
+                    CrimeLocation = string.IsNullOrWhiteSpace(dto.CrimeLocation) ? "Unknown" : dto.CrimeLocation,
+                    CrimeDate = string.IsNullOrWhiteSpace(dto.CrimeDate) ? "Unknown" : dto.CrimeDate,
                 };
 
-                _context.Alerts.Add(alert);
-                await _context.SaveChangesAsync();
-
-                var kidnapperDetails = new KidnapperDetailsAlerts
+                var victim = new Victim
                 {
-                    KidnapperName = string.IsNullOrWhiteSpace(dto.KidnapperName) ? "Unknown" : dto.KidnapperName,
-                    KidnapperAge = dto.KidnapperAge == 0 ? (int)0 : dto.KidnapperAge,
-                    KidnapperSex = string.IsNullOrWhiteSpace(dto.KidnapperSex) ? "Unknown" : dto.KidnapperSex,
-                    KidnapperLook = string.IsNullOrWhiteSpace(dto.KidnapperLook) ? "Unknown look" : dto.KidnapperLook,
-                    KidnapperVehicle = string.IsNullOrWhiteSpace(dto.KidnapperVehicle) ? "Unknown vehicle" : dto.KidnapperVehicle,
-                    AlertsId = alert.Id,
-                    Alerts = alert
+                    VictimName = string.IsNullOrWhiteSpace(dto.Victim.VictimName) ? "Unknown" : dto.Victim.VictimName,
+                    VictimAge = dto.Victim.VictimAge > 0 ? dto.Victim.VictimAge : 0,
+                    VictimSex = string.IsNullOrWhiteSpace(dto.Victim.VictimSex) ? "Unknown" : dto.Victim.VictimSex,
+                    VictimHair = string.IsNullOrWhiteSpace(dto.Victim.VictimHair) ? "Unknown" : dto.Victim.VictimHair,
+                    VictimClothing = string.IsNullOrWhiteSpace(dto.Victim.VictimClothing) ? "Unknown" : dto.Victim.VictimClothing,
+                    Alert = alert
                 };
 
-                _context.KidnapperDetailsAlerts.Add(kidnapperDetails);
-                await _context.SaveChangesAsync();
+                var abductor = new Abductor
+                {
+                    AbductorName = string.IsNullOrWhiteSpace(dto.Abductor.AbductorName) ? "Unknown" : dto.Abductor.AbductorName,
+                    AbductorAge = dto.Abductor.AbductorAge > 0 ? dto.Abductor.AbductorAge : 0,
+                    AbductorSex = string.IsNullOrWhiteSpace(dto.Abductor.AbductorSex) ? "Unknown" : dto.Abductor.AbductorSex,
+                    AbductorHair = string.IsNullOrWhiteSpace(dto.Abductor.AbductorHair) ? "Unknown" : dto.Abductor.AbductorHair,
+                    AbductorClothing = string.IsNullOrWhiteSpace(dto.Abductor.AbductorClothing) ? "Unknown" : dto.Abductor.AbductorClothing,
+                    AbductorVehicle = string.IsNullOrWhiteSpace(dto.Abductor.AbductorVehicle) ? "Unknown" : dto.Abductor.AbductorVehicle,
+                    Alert = alert
+                };
 
+                _context.Alert.Add(alert);
+                _context.Victim.Add(victim);
+                _context.Abductor.Add(abductor);
+
+                await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert created successfully: {@Alert}", alert);
 
                 return Ok(new
                 {
                     message = "Alert created successfully.",
-                    alert
+                    alertId = alert.AlertId
                 });
             }
             catch (Exception ex)
@@ -75,16 +83,17 @@ namespace ALRS.Controllers
 
         [Authorize(Roles = "1")]
         [HttpGet("alert/{id}")]
-        public async Task<IActionResult> GetAlert(int id)
+        public async Task<IActionResult> GetAlertById(int id)
         {
-            _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlert), id);
+            _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlertById), id);
 
 
             try
             {
-                var alert = await _context.Alerts
-                                   .Include(a => a.KidnapperDetailsAlerts)
-                                   .FirstOrDefaultAsync(a => a.Id == id);
+                var alert = await _context.Alert
+                                   .Include(a => a.Victim)
+                                   .Include(a => a.Abductor)
+                                   .FirstOrDefaultAsync(a => a.AlertId == id);
 
                 if (alert == null)
                 {
@@ -92,8 +101,34 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
+
+                var alertDto = new GetAlertById
+                {
+                    AlertStatus = alert.AlertStatus,
+                    CrimeLocation = alert.CrimeLocation,
+                    CrimeDate = alert.CrimeDate,
+
+                    Victim = new GetAlertByIdVictimDto
+                    {
+                        VictimName = alert.Victim.VictimName,
+                        VictimAge = alert.Victim.VictimAge,
+                        VictimSex = alert.Victim.VictimSex,
+                        VictimHair = alert.Victim.VictimHair,
+                        VictimClothing = alert.Victim.VictimClothing
+                    },
+                    Abductor = new GetAlertByIdAbductorDto
+                    {
+                        AbductorName = alert.Abductor?.AbductorName,
+                        AbductorAge = alert.Abductor?.AbductorAge ?? 0,
+                        AbductorSex = alert.Abductor?.AbductorSex,
+                        AbductorHair = alert.Abductor?.AbductorHair,
+                        AbductorClothing = alert.Abductor?.AbductorClothing,
+                        AbductorVehicle = alert.Abductor?.AbductorVehicle
+                    }
+                };
+
                 _logger.LogInformation("Alert with ID {AlertId} retrieved successfully.", id);
-                return Ok(alert);
+                return Ok(alertDto);
 
             }
             catch (Exception ex)
@@ -103,41 +138,100 @@ namespace ALRS.Controllers
             }
         }
 
+        [HttpGet("alert/{id}/user-reports")]
+        public async Task<IActionResult> GetUserReportsForAlert(int id)
+        {
+            _logger.LogInformation("Entering {Action} to retrieve user reports for alert with ID {AlertId}", nameof(GetUserReportsForAlert), id);
+
+            try
+            {
+                var citizenReports = await _context.CitizenReport
+                                    .Where(r => r.AlertId == id)
+                                    .ToListAsync();
+
+                if (citizenReports == null || !citizenReports.Any())
+                {
+                    _logger.LogWarning("No citizen reports found for alert with ID {AlertId}.", id);
+                    return NotFound();
+                }
+
+                var citizenReportDtos = citizenReports.Select(citizenReport => new CitizenReportsDto
+                {
+                    CitizenReportId = citizenReport.CitizenReportId,
+                    CitizenName = citizenReport.CitizenName,
+                    CitizenContactPhone = citizenReport.CitizenContactPhone,
+                    Location = citizenReport.Location,
+                    Date = citizenReport.Date,
+                    Description = citizenReport.Description,
+                    IsAnonymous = citizenReport.IsAnonymous
+                }).ToList();
+
+                _logger.LogInformation("User reports for alert with ID {AlertId} retrieved successfully.", id);
+                return Ok(citizenReportDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving user reports for alert with ID {AlertId}.", id);
+                return StatusCode(500, new { message = "An error occurred while retrieving the user reports.", error = ex.Message });
+            }
+        }
+
+
         [Authorize(Roles = "1")]
         [HttpPut("alert/{id}/update")]
-        public async Task<IActionResult> UpdateAlert(int id, [FromBody] Alerts alert)
+        public async Task<IActionResult> UpdateAlert(int id, [FromBody] UpdateAlertDto dto)
         {
             _logger.LogInformation("Entering {Action} to update alert with ID {AlertId}", nameof(UpdateAlert), id);
 
             try
             {
-                var existingAlert = await _context.Alerts.FindAsync(id);
+                var existingAlert = await _context.Alert
+                    .Include(a => a.Victim)
+                    .Include(a => a.Abductor)
+                    .FirstOrDefaultAsync(a => a.AlertId == id);
+
                 if (existingAlert == null)
                 {
                     _logger.LogWarning("Alert with ID {AlertId} not found.", id);
-                    return NotFound();
+                    return NotFound(new { message = $"Alert with ID {id} not found." });
                 }
 
                 _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
-                existingAlert.VictimName = alert.VictimName;
-                existingAlert.VictimAge = alert.VictimAge;
-                existingAlert.CrimeLocation = alert.CrimeLocation;
-                existingAlert.CrimeDate = alert.CrimeDate;
-                existingAlert.CrimeStatus = alert.CrimeStatus;
+                existingAlert.AlertStatus = dto.AlertStatus;
+                existingAlert.CrimeLocation = dto.CrimeLocation;
+                existingAlert.CrimeDate = dto.CrimeDate;
+
+                if (existingAlert.Victim != null && dto.Victim != null)
+                {
+                    existingAlert.Victim.VictimName = dto.Victim.VictimName;
+                    existingAlert.Victim.VictimAge = dto.Victim.VictimAge;
+                    existingAlert.Victim.VictimSex = dto.Victim.VictimSex;
+                    existingAlert.Victim.VictimHair = dto.Victim.VictimHair;
+                    existingAlert.Victim.VictimClothing = dto.Victim.VictimClothing;
+                }
+
+                if (existingAlert.Abductor != null && dto.Abductor != null)
+                {
+                    existingAlert.Abductor.AbductorName = dto.Abductor.AbductorName;
+                    existingAlert.Abductor.AbductorAge = dto.Abductor.AbductorAge;
+                    existingAlert.Abductor.AbductorSex = dto.Abductor.AbductorSex;
+                    existingAlert.Abductor.AbductorHair = dto.Abductor.AbductorHair;
+                    existingAlert.Abductor.AbductorClothing = dto.Abductor.AbductorClothing;
+                    existingAlert.Abductor.AbductorVehicle = dto.Abductor.AbductorVehicle;
+                }
 
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert with ID {AlertId} updated successfully.", id);
-                return Ok(existingAlert);
+                return Ok(new { message = "Alert updated successfully.", alert = existingAlert });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating alert with ID {AlertId}.", id);
-                return StatusCode(500, new { message = "An error occurred while updating alerts.", error = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while updating the alert.", error = ex.Message });
             }
         }
-
 
         [Authorize(Roles = "1")]
         [HttpPatch("alerts/{id}/close")]
@@ -147,58 +241,29 @@ namespace ALRS.Controllers
 
             try
             {
-                var alert = await _context.Alerts.FindAsync(id);
+                var alert = await _context.Alert.FindAsync(id);
                 if (alert == null)
                 {
                     _logger.LogWarning("Alert with ID {AlertId} not found.", id);
                     return NotFound();
                 }
 
-                if (alert.CrimeStatus == 0)
+                if (alert.AlertStatus == 1)
                 {
                     _logger.LogInformation("Alert with ID {AlertsId} already closed.", id);
                     return Ok("Alert dont need to be closed");
                 }
 
-                alert.CrimeStatus = 0;
+                alert.AlertStatus = 1;
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert with ID {AlertId} closed successfully.", id);
-                return Ok($"Alert with ID {alert.Id} successfuly closed, status {alert.CrimeStatus}");
+                return Ok($"Alert with ID {alert.AlertId} successfuly closed, status {alert.AlertStatus}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while closing alert with ID {AlertId}.", id);
                 return StatusCode(500, new { message = "An error occurred while closing the alert.", error = ex.Message });
-            }
-        }
-
-        [Authorize(Roles = "1")]
-        [HttpDelete("alerts/all")]
-        public async Task<IActionResult> DeleteAllAlerts()
-        {
-            _logger.LogInformation("Entering {Action} to delete all alerts", nameof(DeleteAllAlerts));
-
-            try
-            {
-                var allAlerts = _context.Alerts.ToList();
-
-                if (!allAlerts.Any())
-                {
-                    _logger.LogWarning("No alerts found to delete.");
-                    return Ok(new { message = "No alerts to delete." });
-                }
-
-                _context.Alerts.RemoveRange(allAlerts);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("All alerts have been deleted successfully.");
-                return Ok(new { message = "All alerts have been deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while deleting all alerts.");
-                return StatusCode(500, new { message = "An error occurred while deleting alerts.", error = ex.Message });
             }
         }
 
@@ -210,11 +275,14 @@ namespace ALRS.Controllers
 
             try
             {
-                var alerts = await _context.Alerts
-                    .Include(alert => alert.KidnapperDetailsAlerts)
+                var alerts = await _context.Alert
+                    .Include(alert => alert.Victim)
+                    .Include(alert => alert.Abductor)
                     .ToListAsync();
 
-                _logger.LogInformation("Retrieved {Count} alerts with kidnapper details.", alerts.Count);
+
+
+                _logger.LogInformation("Retrieved {Count} alerts.", alerts.Count);
                 return Ok(alerts);
             }
             catch (Exception ex)

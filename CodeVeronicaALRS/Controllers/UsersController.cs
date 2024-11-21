@@ -1,4 +1,5 @@
-﻿using ALRS.Models;
+﻿using ALRS.DTO;
+using ALRS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : Controller
@@ -19,34 +21,63 @@ namespace ALRS.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "1")]
+        [AllowAnonymous]
+        [Authorize(Roles = "0")]
         [HttpGet("users")]
-        public async Task<List<Users>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
             _logger.LogInformation("Entering {Action} to retrieve all users.", nameof(GetAllUsers));
 
-            var users = await _userManager.Users.ToListAsync();
+            try
+            {
+                var users = await _userManager.Users.ToListAsync();
 
-            _logger.LogInformation("Retrieved {UserCount} users in {Action}.", users.Count, nameof(GetAllUsers));
-            return users;
+                _logger.LogInformation("Retrieved {UserCount} users in {Action}.", users.Count, nameof(GetAllUsers));
+
+                var usersDto = users.Select(user => new UserDto
+                {
+                    UserId = user.UserId,
+                    Name = user.UserName,
+                    LoginWithIdentifier = user.LoginWithIdentifier,
+                    Email = user.Email,
+                    Role = user.Role
+                }).ToList();
+
+                return Ok(usersDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving users.");
+                return StatusCode(500, new { message = "An error occurred while retrieving users.", error = ex.Message });
+            }
         }
 
-        [Authorize(Roles = "1")]
+
+        [Authorize(Roles = "0")]
         [HttpGet("user/{id}/show")]
         public async Task<IActionResult> GetUserById(int id)
         {
             _logger.LogInformation("Entering {Action} to retrieve user with ID: {UserId}.", nameof(GetUserById), id);
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserId == id);
-
-            if (user != null)
+            try
             {
-                _logger.LogInformation("User with ID {UserId} found in {Action}.", id, nameof(GetUserById));
-                return Ok(user);
-            }
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserId == id);
 
-            _logger.LogWarning("User with ID {UserId} not found in {Action}.", id, nameof(GetUserById));
-            return NotFound(new { message = "User not found." });
+                if (user != null)
+                {
+                    _logger.LogInformation("User with ID {UserId} found in {Action}.", id, nameof(GetUserById));
+                    return Ok(user);
+                }
+
+                _logger.LogWarning("User with ID {UserId} not found in {Action}.", id, nameof(GetUserById));
+                return NotFound(new { message = "User not found." });
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting user with ID {UserId}.", id);
+                return StatusCode(500, new { message = "An error occurred while updating alerts.", error = ex.Message });
+            }
         }
 
         [Authorize(Roles = "0")]
