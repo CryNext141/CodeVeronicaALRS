@@ -22,6 +22,7 @@
 # Environment Variables
 *.env
 *.local
+Migrations/
 
 # NuGet Packages
 *.nupkg

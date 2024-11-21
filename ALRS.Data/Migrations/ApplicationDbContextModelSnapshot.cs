@@ -22,32 +22,76 @@ namespace ALRS.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ALRS.Models.Alerts", b =>
+            modelBuilder.Entity("ALRS.Models.Abductor", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("AbductorId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AbductorId"));
+
+                    b.Property<int>("AbductorAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AbductorClothing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorHair")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorVehicle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("AlertId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AbductorId");
+
+                    b.HasIndex("AlertId")
+                        .IsUnique();
+
+                    b.ToTable("Abductor");
+                });
+
+            modelBuilder.Entity("ALRS.Models.Alert", b =>
+                {
+                    b.Property<int>("AlertId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AlertId"));
+
+                    b.Property<int?>("AbductorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AlertStatus")
+                        .HasColumnType("int");
 
                     b.Property<string>("CrimeDate")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CrimeLocation")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CrimeStatus")
+                    b.Property<int?>("VictimId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VictimAge")
-                        .HasColumnType("int");
+                    b.HasKey("AlertId");
 
-                    b.Property<string>("VictimName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Alerts");
+                    b.ToTable("Alert");
                 });
 
             modelBuilder.Entity("ALRS.Models.BlacklistedToken", b =>
@@ -70,110 +114,44 @@ namespace ALRS.Data.Migrations
                     b.ToTable("BlacklistedTokens");
                 });
 
-            modelBuilder.Entity("ALRS.Models.KidnapperDetails", b =>
+            modelBuilder.Entity("ALRS.Models.CitizenReport", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("CitizenReportId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CitizenReportId"));
 
-                    b.Property<int>("KidnapperAge")
+                    b.Property<int>("AlertId")
                         .HasColumnType("int");
 
-                    b.Property<string>("KidnapperLook")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KidnapperName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KidnapperSex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KidnapperVehicle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserSubmittedAlertId")
+                    b.Property<int>("CitizenContactPhone")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserSubmittedAlertId")
-                        .IsUnique();
-
-                    b.ToTable("KidnapperDetails");
-                });
-
-            modelBuilder.Entity("ALRS.Models.KidnapperDetailsAlerts", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AlertsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KidnapperAge")
-                        .HasColumnType("int");
-
-                    b.Property<string>("KidnapperLook")
+                    b.Property<string>("CitizenName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KidnapperName")
+                    b.Property<string>("Date")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KidnapperSex")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KidnapperVehicle")
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("CitizenReportId");
 
-                    b.HasIndex("AlertsId")
-                        .IsUnique();
+                    b.HasIndex("AlertId");
 
-                    b.ToTable("KidnapperDetailsAlerts");
-                });
-
-            modelBuilder.Entity("ALRS.Models.UserSubmittedAlert", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AlertsId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CrimeDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CrimeLocation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VictimLook")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AlertsId");
-
-                    b.ToTable("UserSubmittedAlerts");
+                    b.ToTable("CitizenReport");
                 });
 
             modelBuilder.Entity("ALRS.Models.Users", b =>
@@ -254,6 +232,44 @@ namespace ALRS.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("ALRS.Models.Victim", b =>
+                {
+                    b.Property<int>("VictimId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VictimId"));
+
+                    b.Property<int>("AlertId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VictimAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VictimClothing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimHair")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("VictimId");
+
+                    b.HasIndex("AlertId")
+                        .IsUnique();
+
+                    b.ToTable("Victim");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -389,37 +405,37 @@ namespace ALRS.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ALRS.Models.KidnapperDetails", b =>
+            modelBuilder.Entity("ALRS.Models.Abductor", b =>
                 {
-                    b.HasOne("ALRS.Models.UserSubmittedAlert", "UserSubmittedAlert")
-                        .WithOne("KidnapperDetails")
-                        .HasForeignKey("ALRS.Models.KidnapperDetails", "UserSubmittedAlertId")
+                    b.HasOne("ALRS.Models.Alert", "Alert")
+                        .WithOne("Abductor")
+                        .HasForeignKey("ALRS.Models.Abductor", "AlertId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserSubmittedAlert");
+                    b.Navigation("Alert");
                 });
 
-            modelBuilder.Entity("ALRS.Models.KidnapperDetailsAlerts", b =>
+            modelBuilder.Entity("ALRS.Models.CitizenReport", b =>
                 {
-                    b.HasOne("ALRS.Models.Alerts", "Alerts")
-                        .WithOne("KidnapperDetailsAlerts")
-                        .HasForeignKey("ALRS.Models.KidnapperDetailsAlerts", "AlertsId")
+                    b.HasOne("ALRS.Models.Alert", "Alert")
+                        .WithMany("CitizenReports")
+                        .HasForeignKey("AlertId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Alerts");
+                    b.Navigation("Alert");
                 });
 
-            modelBuilder.Entity("ALRS.Models.UserSubmittedAlert", b =>
+            modelBuilder.Entity("ALRS.Models.Victim", b =>
                 {
-                    b.HasOne("ALRS.Models.Alerts", "Alerts")
-                        .WithMany("UserSubmittedAlerts")
-                        .HasForeignKey("AlertsId")
+                    b.HasOne("ALRS.Models.Alert", "Alert")
+                        .WithOne("Victim")
+                        .HasForeignKey("ALRS.Models.Victim", "AlertId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Alerts");
+                    b.Navigation("Alert");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -473,16 +489,15 @@ namespace ALRS.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ALRS.Models.Alerts", b =>
+            modelBuilder.Entity("ALRS.Models.Alert", b =>
                 {
-                    b.Navigation("KidnapperDetailsAlerts");
+                    b.Navigation("Abductor")
+                        .IsRequired();
 
-                    b.Navigation("UserSubmittedAlerts");
-                });
+                    b.Navigation("CitizenReports");
 
-            modelBuilder.Entity("ALRS.Models.UserSubmittedAlert", b =>
-                {
-                    b.Navigation("KidnapperDetails");
+                    b.Navigation("Victim")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
