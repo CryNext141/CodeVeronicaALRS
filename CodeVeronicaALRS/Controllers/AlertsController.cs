@@ -307,6 +307,7 @@ namespace ALRS.Controllers
 
                 var result = alerts.Select(a => new GetAlertById
                 {
+                    AlertId = a.AlertId,
                     AlertStatus = a.AlertStatus,
                     CrimeLocation = a.CrimeLocation,
                     CrimeDate = a.CrimeDate,
