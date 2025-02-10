@@ -8,6 +8,8 @@
         public string VictimSex { get; set; }
         public string VictimHair {  get; set; }
         public string VictimClothing {  get; set; }
+        public byte[] VictimPhoto { get; set; }
+
         public int AlertId { get; set; }
         public Alert Alert { get; set; }
     }

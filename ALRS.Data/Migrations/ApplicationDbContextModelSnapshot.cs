@@ -45,6 +45,10 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("AbductorPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("AbductorSex")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -259,6 +263,10 @@ namespace ALRS.Data.Migrations
                     b.Property<string>("VictimName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("VictimPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("VictimSex")
                         .IsRequired()

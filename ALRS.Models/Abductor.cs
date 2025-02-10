@@ -9,6 +9,7 @@
         public string AbductorHair { get; set;}
         public string AbductorClothing { get; set;}
         public string AbductorVehicle {  get; set;}
+        public byte[] AbductorPhoto { get; set; }
         public int AlertId { get; set; }
         public Alert Alert { get; set;}
     }

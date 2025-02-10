@@ -16,6 +16,7 @@
         public string VictimSex { get; set; }
         public string VictimHair { get; set; }
         public string VictimClothing { get; set; }
+        public string VictimPhoto { get; set; }
     }
 
     public class GetAlertByIdAbductorDto
@@ -26,5 +27,6 @@
         public string AbductorHair { get; set; }
         public string AbductorClothing { get; set; }
         public string AbductorVehicle { get; set; }
+        public string AbductorPhoto { get; set; }
     }
 }

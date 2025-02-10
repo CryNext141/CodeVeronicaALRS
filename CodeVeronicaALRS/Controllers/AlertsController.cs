@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ALRS.Controllers
 {
+    [AllowAnonymous]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -14,11 +15,24 @@ namespace ALRS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AlertsController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger)
+
+        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
+            _env = env;
+        }
+
+        private byte[] GetPlaceholderImageBytes()
+        {
+            var placeholderPath = Path.Combine(_env.ContentRootPath, "Resources", "placeholder.png");
+            if (System.IO.File.Exists(placeholderPath))
+            {
+                return System.IO.File.ReadAllBytes(placeholderPath);
+            }
+            return new byte[0];
         }
 
 
@@ -44,6 +58,9 @@ namespace ALRS.Controllers
                     VictimSex = string.IsNullOrWhiteSpace(dto.Victim.VictimSex) ? "Unknown" : dto.Victim.VictimSex,
                     VictimHair = string.IsNullOrWhiteSpace(dto.Victim.VictimHair) ? "Unknown" : dto.Victim.VictimHair,
                     VictimClothing = string.IsNullOrWhiteSpace(dto.Victim.VictimClothing) ? "Unknown" : dto.Victim.VictimClothing,
+                    VictimPhoto = string.IsNullOrEmpty(dto.Victim.VictimPhoto)
+                        ? GetPlaceholderImageBytes()
+                        : Convert.FromBase64String(dto.Victim.VictimPhoto),
                     Alert = alert
                 };
 
@@ -55,6 +72,9 @@ namespace ALRS.Controllers
                     AbductorHair = string.IsNullOrWhiteSpace(dto.Abductor.AbductorHair) ? "Unknown" : dto.Abductor.AbductorHair,
                     AbductorClothing = string.IsNullOrWhiteSpace(dto.Abductor.AbductorClothing) ? "Unknown" : dto.Abductor.AbductorClothing,
                     AbductorVehicle = string.IsNullOrWhiteSpace(dto.Abductor.AbductorVehicle) ? "Unknown" : dto.Abductor.AbductorVehicle,
+                    AbductorPhoto = string.IsNullOrEmpty(dto.Abductor.AbductorPhoto)
+                        ? GetPlaceholderImageBytes()
+                        : Convert.FromBase64String(dto.Abductor.AbductorPhoto),
                     Alert = alert
                 };
 
@@ -276,14 +296,42 @@ namespace ALRS.Controllers
             try
             {
                 var alerts = await _context.Alert
-                    .Include(alert => alert.Victim)
-                    .Include(alert => alert.Abductor)
+                    .Include(a => a.Victim)
+                    .Include(a => a.Abductor)
                     .ToListAsync();
 
+                var result = alerts.Select(a => new GetAlertById
+                {
+                    AlertStatus = a.AlertStatus,
+                    CrimeLocation = a.CrimeLocation,
+                    CrimeDate = a.CrimeDate,
+                    Victim = new GetAlertByIdVictimDto
+                    {
+                        VictimName = a.Victim.VictimName,
+                        VictimAge = a.Victim.VictimAge,
+                        VictimSex = a.Victim.VictimSex,
+                        VictimHair = a.Victim.VictimHair,
+                        VictimClothing = a.Victim.VictimClothing,
+                        VictimPhoto = (a.Victim.VictimPhoto != null && a.Victim.VictimPhoto.Length > 0)
+                            ? Convert.ToBase64String(a.Victim.VictimPhoto)
+                            : Convert.ToBase64String(GetPlaceholderImageBytes())
+                    },
+                    Abductor = new GetAlertByIdAbductorDto
+                    {
+                        AbductorName = a.Abductor.AbductorName,
+                        AbductorAge = a.Abductor.AbductorAge,
+                        AbductorSex = a.Abductor.AbductorSex,
+                        AbductorHair = a.Abductor.AbductorHair,
+                        AbductorClothing = a.Abductor.AbductorClothing,
+                        AbductorVehicle = a.Abductor.AbductorVehicle,
+                        AbductorPhoto = (a.Abductor.AbductorPhoto != null && a.Abductor.AbductorPhoto.Length > 0)
+                            ? Convert.ToBase64String(a.Abductor.AbductorPhoto)
+                            : Convert.ToBase64String(GetPlaceholderImageBytes())
+                    }
+                }).ToList();
 
-
-                _logger.LogInformation("Retrieved {Count} alerts.", alerts.Count);
-                return Ok(alerts);
+                _logger.LogInformation("Retrieved {Count} alerts.", result.Count);
+                return Ok(result);
             }
             catch (Exception ex)
             {
