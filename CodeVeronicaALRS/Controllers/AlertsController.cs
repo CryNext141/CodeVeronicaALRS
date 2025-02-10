@@ -25,9 +25,14 @@ namespace ALRS.Controllers
             _env = env;
         }
 
-        private byte[] GetPlaceholderImageBytes()
+        private byte[] GetPlaceholderImageBytes(string type)
         {
-            var placeholderPath = Path.Combine(_env.ContentRootPath, "Resources", "placeholder.png");
+            string placeholderFileName = type.Equals("victim", StringComparison.OrdinalIgnoreCase)
+                ? "placeholder_victim.jpg"
+                : "placeholder_abductor.png";
+
+            var placeholderPath = Path.Combine(_env.ContentRootPath, "Resources", placeholderFileName);
+
             if (System.IO.File.Exists(placeholderPath))
             {
                 return System.IO.File.ReadAllBytes(placeholderPath);
@@ -59,7 +64,7 @@ namespace ALRS.Controllers
                     VictimHair = string.IsNullOrWhiteSpace(dto.Victim.VictimHair) ? "Unknown" : dto.Victim.VictimHair,
                     VictimClothing = string.IsNullOrWhiteSpace(dto.Victim.VictimClothing) ? "Unknown" : dto.Victim.VictimClothing,
                     VictimPhoto = string.IsNullOrEmpty(dto.Victim.VictimPhoto)
-                        ? GetPlaceholderImageBytes()
+                        ? GetPlaceholderImageBytes("victim")
                         : Convert.FromBase64String(dto.Victim.VictimPhoto),
                     Alert = alert
                 };
@@ -73,7 +78,7 @@ namespace ALRS.Controllers
                     AbductorClothing = string.IsNullOrWhiteSpace(dto.Abductor.AbductorClothing) ? "Unknown" : dto.Abductor.AbductorClothing,
                     AbductorVehicle = string.IsNullOrWhiteSpace(dto.Abductor.AbductorVehicle) ? "Unknown" : dto.Abductor.AbductorVehicle,
                     AbductorPhoto = string.IsNullOrEmpty(dto.Abductor.AbductorPhoto)
-                        ? GetPlaceholderImageBytes()
+                        ? GetPlaceholderImageBytes("abductor")
                         : Convert.FromBase64String(dto.Abductor.AbductorPhoto),
                     Alert = alert
                 };
@@ -314,7 +319,7 @@ namespace ALRS.Controllers
                         VictimClothing = a.Victim.VictimClothing,
                         VictimPhoto = (a.Victim.VictimPhoto != null && a.Victim.VictimPhoto.Length > 0)
                             ? Convert.ToBase64String(a.Victim.VictimPhoto)
-                            : Convert.ToBase64String(GetPlaceholderImageBytes())
+                            : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
                     },
                     Abductor = new GetAlertByIdAbductorDto
                     {
@@ -326,7 +331,7 @@ namespace ALRS.Controllers
                         AbductorVehicle = a.Abductor.AbductorVehicle,
                         AbductorPhoto = (a.Abductor.AbductorPhoto != null && a.Abductor.AbductorPhoto.Length > 0)
                             ? Convert.ToBase64String(a.Abductor.AbductorPhoto)
-                            : Convert.ToBase64String(GetPlaceholderImageBytes())
+                            : Convert.ToBase64String(GetPlaceholderImageBytes("abductor"))
                     }
                 }).ToList();
 
