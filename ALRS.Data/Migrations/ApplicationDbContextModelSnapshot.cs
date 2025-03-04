@@ -82,6 +82,9 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertStatus")
                         .HasColumnType("int");
 
+                    b.Property<bool>("BroadcastCancelled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("CrimeDate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -156,6 +159,25 @@ namespace ALRS.Data.Migrations
                     b.HasIndex("AlertId");
 
                     b.ToTable("CitizenReport");
+                });
+
+            modelBuilder.Entity("ALRS.Models.Subscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("ChatId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subscriptions");
                 });
 
             modelBuilder.Entity("ALRS.Models.Users", b =>

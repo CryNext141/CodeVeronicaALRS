@@ -32,5 +32,6 @@ namespace ALRS.Data
         public DbSet<Abductor> Abductor { get; set; }
         public DbSet<CitizenReport> CitizenReport { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
     }
 }

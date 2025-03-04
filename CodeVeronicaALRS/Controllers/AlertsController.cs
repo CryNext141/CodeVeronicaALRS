@@ -2,13 +2,18 @@
 using ALRS.DTO;
 using ALRS.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace ALRS.Controllers
 {
     [AllowAnonymous]
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AlertsController : ControllerBase
@@ -16,13 +21,15 @@ namespace ALRS.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AlertsController> _logger;
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
 
-        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env)
+        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
             _env = env;
+            _configuration = configuration;
         }
 
         private byte[] GetPlaceholderImageBytes(string type)
@@ -344,6 +351,170 @@ namespace ALRS.Controllers
                 _logger.LogError(ex, "An error occurred while getting all alerts.");
                 return StatusCode(500, new { message = "An error occurred while getting all alerts.", error = ex.Message });
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("alert/{id}/send")]
+        public async Task<IActionResult> SendAlertNotification(int id)
+        {
+            _logger.LogInformation("Starting to send alert {AlertId}", id);
+
+            try
+            {
+                var alert = await _context.Alert
+                    .Include(a => a.Victim)
+                    .Include(a => a.Abductor)
+                    .FirstOrDefaultAsync(a => a.AlertId == id);
+
+                if (alert == null)
+                {
+                    _logger.LogWarning("Alert {AlertId} not found", id);
+                    return NotFound(new { message = "Alert not found." });
+                }
+
+                var subscriptions = await _context.Subscriptions
+                    .Where(s => s.IsActive)
+                    .ToListAsync();
+
+                if (!subscriptions.Any())
+                {
+                    _logger.LogInformation("No active subscriptions to send alert {AlertId}", id);
+                    return Ok(new { message = "No active subscriptions." });
+                }
+
+                var botToken = _configuration["BotToken"];
+                if (string.IsNullOrEmpty(botToken))
+                {
+                    _logger.LogError("Bot token is missing in configuration.");
+                    return StatusCode(500, new { message = "Internal server error." });
+                }
+
+                var botClient = new TelegramBotClient(botToken);
+
+                foreach (var subscription in subscriptions)
+                {
+                    try
+                    {
+                        byte[] photoBytes = alert.Victim?.VictimPhoto ?? GetPlaceholderImageBytes("victim");
+                        using var photoStream = new MemoryStream(photoBytes);
+
+                        var caption = FormatAlertMessage(alert);
+
+                        await botClient.SendPhotoAsync(
+                            chatId: subscription.ChatId,
+                            photo: Telegram.Bot.Types.InputFile.FromStream(photoStream, "alert_photo.jpg"),
+                            caption: caption,
+                            parseMode: ParseMode.Html);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send alert {AlertId} to chat {ChatId}", id, subscription.ChatId);
+                    }
+                }
+
+                return Ok(new { message = $"Alert sent to {subscriptions.Count} subscribers." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending alert {AlertId}", id);
+                return StatusCode(500, new { message = "Error sending alert." });
+            }
+        }
+
+        
+        private string FormatAlertMessage(Alert alert)
+        {
+            return $"<b>🚨 НОВЕ ВИКРАДЕННЯ</b>\n" +
+                   $"📍 Місце: {alert.CrimeLocation}\n" +
+                   $"🕒 Час: {alert.CrimeDate}\n" +
+                   $"👶 Ім'я: {alert.Victim.VictimName}\n" +
+                   $"🔢 Вік: {alert.Victim.VictimAge}\n" +
+                   $"🚻 Стать: {alert.Victim.VictimSex}\n" +
+                   $"🎨 Колір волосся: {alert.Victim.VictimHair}\n" +
+                   $"👕 Одяг: {alert.Victim.VictimClothing}\n" +
+                   $"\n" +
+                   $"Якщо Вам відома якась інформація повідомляйте за номером:\n" +
+                   $"000-000-00";
+        }
+
+        [HttpPost("subscribe/{chatId}")]
+        public async Task<IActionResult> Subscribe(long chatId)
+        {
+            _logger.LogInformation("Attempting to subscribe chat ID {ChatId}", chatId);
+
+            try
+            {
+                var existingSubscription = await _context.Subscriptions
+                    .FirstOrDefaultAsync(s => s.ChatId == chatId);
+
+                if (existingSubscription != null)
+                {
+                    if (existingSubscription.IsActive)
+                    {
+                        _logger.LogInformation("Chat ID {ChatId} is already subscribed.", chatId);
+                        return Ok(new { message = "You are already subscribed." });
+                    }
+                    else
+                    {
+                        existingSubscription.IsActive = true;
+                        _logger.LogInformation("Chat ID {ChatId} resubscribed.", chatId);
+                    }
+                }
+                else
+                {
+                    var subscription = new Subscription
+                    {
+                        ChatId = chatId,
+                        IsActive = true
+                    };
+                    _context.Subscriptions.Add(subscription);
+                    _logger.LogInformation("Chat ID {ChatId} successfully subscribed.", chatId);
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "You have been successfully subscribed." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error subscribing chat ID {ChatId}", chatId);
+                return StatusCode(500, new { message = "An error occurred while subscribing.", error = ex.Message });
+            }
+        }
+
+        [HttpPost("unsubscribe/{chatId}")]
+        public async Task<IActionResult> Unsubscribe(long chatId)
+        {
+            _logger.LogInformation("Attempting to unsubscribe chat ID {ChatId}", chatId);
+
+            try
+            {
+                var subscription = await _context.Subscriptions
+                    .FirstOrDefaultAsync(s => s.ChatId == chatId);
+
+                if (subscription == null)
+                {
+                    _logger.LogInformation("Chat ID {ChatId} is not subscribed.", chatId);
+                    return Ok(new { message = "You are not subscribed." });
+                }
+
+                subscription.IsActive = false;
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Chat ID {ChatId} successfully unsubscribed.", chatId);
+                return Ok(new { message = "You have been successfully unsubscribed." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unsubscribing chat ID {ChatId}", chatId);
+                return StatusCode(500, new { message = "An error occurred while unsubscribing.", error = ex.Message });
+            }
+        }
+
+        [HttpGet("subscriptionStatus/{chatId}")]
+        public async Task<IActionResult> GetSubscriptionStatus(long chatId)
+        {
+            var subscription = await _context.Subscriptions.FirstOrDefaultAsync(s => s.ChatId == chatId);
+            return Ok(new SubscriptionStatusDto { IsSubscribed = subscription?.IsActive == true });
         }
     }
 }
