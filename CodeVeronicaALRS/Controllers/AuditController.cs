@@ -1,10 +1,14 @@
 ﻿using ALRS.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CodeVeronicaALRS.Controllers
 {
     [ApiController]
+    [Route("api/[controller]")]
     public class AuditController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -39,12 +43,22 @@ namespace CodeVeronicaALRS.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
+            var result = auditHistory.Select(a => new
+            {
+                auditLogId = a.AuditLogId,
+                actionName = a.ActionName, 
+                action = a.Action,         
+                responseStatusCode = a.ResponseStatusCode,
+                date = a.Timestamp.ToString("yyyy-MM-dd"),
+                time = a.Timestamp.ToString("HH:mm:ss")
+            });
+
             return Ok(new
             {
-                TotalRecords = totalRecords,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                Data = auditHistory
+                totalRecords,
+                pageNumber,
+                pageSize,
+                data = result
             });
         }
     }

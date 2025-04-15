@@ -110,11 +110,11 @@ namespace ALRS.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditLogId"));
 
-                    b.Property<string>("ActionName")
+                    b.Property<string>("Action")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RequestData")
+                    b.Property<string>("ActionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
