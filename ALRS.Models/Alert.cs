@@ -4,6 +4,7 @@
     {
         public int AlertId { get; set; }
         public int AlertStatus { get; set; }
+        public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public string CrimeDate { get; set; }
         public Victim Victim { get; set; }

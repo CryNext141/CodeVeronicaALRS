@@ -172,7 +172,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.EnsureCreated();
         Log.Information("Database ensured to be created.");
     }
     catch (Exception ex)

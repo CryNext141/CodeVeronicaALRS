@@ -9,6 +9,7 @@ namespace ALRS.DTO
     public class UpdateAlertDto
     {
         public int AlertStatus { get; set; }
+        public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public string CrimeDate { get; set; }
         public VictimDto Victim { get; set; }

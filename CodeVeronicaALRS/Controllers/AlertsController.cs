@@ -52,6 +52,7 @@ namespace ALRS.Controllers
                 var alert = new Alert
                 {
                     AlertStatus = dto.AlertStatus,
+                    CrimeDistrict = string.IsNullOrWhiteSpace(dto.CrimeDistrict) ? "Unknown" : dto.CrimeDistrict,
                     CrimeLocation = string.IsNullOrWhiteSpace(dto.CrimeLocation) ? "Unknown" : dto.CrimeLocation,
                     CrimeDate = string.IsNullOrWhiteSpace(dto.CrimeDate) ? "Unknown" : dto.CrimeDate,
                 };
@@ -129,6 +130,7 @@ namespace ALRS.Controllers
                 var alertDto = new GetAlertById
                 {
                     AlertStatus = alert.AlertStatus,
+                    CrimeDistrict = alert.CrimeDistrict,
                     CrimeLocation = alert.CrimeLocation,
                     CrimeDate = alert.CrimeDate,
 
@@ -224,6 +226,7 @@ namespace ALRS.Controllers
                 _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
                 existingAlert.AlertStatus = dto.AlertStatus;
+                existingAlert.CrimeDistrict = dto.CrimeDistrict;
                 existingAlert.CrimeLocation = dto.CrimeLocation;
                 existingAlert.CrimeDate = dto.CrimeDate;
 
@@ -309,6 +312,7 @@ namespace ALRS.Controllers
                 {
                     AlertId = a.AlertId,
                     AlertStatus = a.AlertStatus,
+                    CrimeDistrict = a.CrimeDistrict,
                     CrimeLocation = a.CrimeLocation,
                     CrimeDate = a.CrimeDate,
                     Victim = new GetAlertByIdVictimDto

@@ -9,7 +9,6 @@ namespace ALRS.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,5 +31,7 @@ namespace ALRS.Data
         public DbSet<Abductor> Abductor { get; set; }
         public DbSet<CitizenReport> CitizenReport { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet <AuditLog> AuditLogs { get; set; }
+
     }
 }
