@@ -30,8 +30,4 @@
     <ProjectReference Include="..\ALRS.Data\ALRS.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Filters\" />
-  </ItemGroup>
-
 </Project>
