@@ -6,8 +6,10 @@
         public string AbductorName { get; set; }
         public int AbductorAge { get; set; }
         public string AbductorSex { get; set;}
+        public string AbductorSkinColor { get; set; }
         public string AbductorHair { get; set;}
         public string AbductorClothing { get; set;}
+        public string AbductorDistinctiveFeatures { get; set; }
         public string AbductorVehicle {  get; set;}
         public byte[] AbductorPhoto { get; set; }
         public int AlertId { get; set; }

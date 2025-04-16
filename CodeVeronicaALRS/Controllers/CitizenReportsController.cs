@@ -41,7 +41,7 @@ namespace ALRS.Controllers
                 var childCitizenReport = new CitizenReport
                 {
                     CitizenName = string.IsNullOrWhiteSpace(citizenReportsDto.CitizenName) ? "Unknown" : citizenReportsDto.CitizenName,
-                    CitizenContactPhone = citizenReportsDto.CitizenContactPhone > 0 ? citizenReportsDto.CitizenContactPhone : 0,
+                    CitizenContactPhone = string.IsNullOrWhiteSpace(citizenReportsDto.CitizenContactPhone) ? "Unknown" : citizenReportsDto.CitizenContactPhone,
                     Location = citizenReportsDto.Location,
                     Date = citizenReportsDto.Date,
                     Description = citizenReportsDto.Description,

@@ -54,7 +54,7 @@ namespace ALRS.Controllers
                     AlertStatus = dto.AlertStatus,
                     CrimeDistrict = string.IsNullOrWhiteSpace(dto.CrimeDistrict) ? "Unknown" : dto.CrimeDistrict,
                     CrimeLocation = string.IsNullOrWhiteSpace(dto.CrimeLocation) ? "Unknown" : dto.CrimeLocation,
-                    CrimeDate = string.IsNullOrWhiteSpace(dto.CrimeDate) ? "Unknown" : dto.CrimeDate,
+                    CrimeDate = string.IsNullOrEmpty(dto.CrimeDate) ? "Unknown" : dto.CrimeDate,
                 };
 
                 var victim = new Victim
@@ -62,8 +62,10 @@ namespace ALRS.Controllers
                     VictimName = string.IsNullOrWhiteSpace(dto.Victim.VictimName) ? "Unknown" : dto.Victim.VictimName,
                     VictimAge = dto.Victim.VictimAge > 0 ? dto.Victim.VictimAge : 0,
                     VictimSex = string.IsNullOrWhiteSpace(dto.Victim.VictimSex) ? "Unknown" : dto.Victim.VictimSex,
+                    VictimSkinColor = string.IsNullOrWhiteSpace(dto.Victim.VictimSkinColor) ? "Unknown" : dto.Victim.VictimSkinColor,
                     VictimHair = string.IsNullOrWhiteSpace(dto.Victim.VictimHair) ? "Unknown" : dto.Victim.VictimHair,
                     VictimClothing = string.IsNullOrWhiteSpace(dto.Victim.VictimClothing) ? "Unknown" : dto.Victim.VictimClothing,
+                    VictimDistinctiveFeatures = string.IsNullOrWhiteSpace(dto.Victim.VictimDistinctiveFeatures) ? "Unknown" : dto.Victim.VictimDistinctiveFeatures,
                     VictimPhoto = string.IsNullOrEmpty(dto.Victim.VictimPhoto)
                         ? GetPlaceholderImageBytes("victim")
                         : Convert.FromBase64String(dto.Victim.VictimPhoto),
@@ -75,8 +77,10 @@ namespace ALRS.Controllers
                     AbductorName = string.IsNullOrWhiteSpace(dto.Abductor.AbductorName) ? "Unknown" : dto.Abductor.AbductorName,
                     AbductorAge = dto.Abductor.AbductorAge > 0 ? dto.Abductor.AbductorAge : 0,
                     AbductorSex = string.IsNullOrWhiteSpace(dto.Abductor.AbductorSex) ? "Unknown" : dto.Abductor.AbductorSex,
+                    AbductorSkinColor = string.IsNullOrWhiteSpace(dto.Abductor.AbductorSkinColor) ? "Unknown" : dto.Abductor.AbductorSkinColor,
                     AbductorHair = string.IsNullOrWhiteSpace(dto.Abductor.AbductorHair) ? "Unknown" : dto.Abductor.AbductorHair,
                     AbductorClothing = string.IsNullOrWhiteSpace(dto.Abductor.AbductorClothing) ? "Unknown" : dto.Abductor.AbductorClothing,
+                    AbductorDistinctiveFeatures = string.IsNullOrWhiteSpace(dto.Abductor.AbductorDistinctiveFeatures) ? "Unknown" : dto.Abductor.AbductorDistinctiveFeatures,
                     AbductorVehicle = string.IsNullOrWhiteSpace(dto.Abductor.AbductorVehicle) ? "Unknown" : dto.Abductor.AbductorVehicle,
                     AbductorPhoto = string.IsNullOrEmpty(dto.Abductor.AbductorPhoto)
                         ? GetPlaceholderImageBytes("abductor")
@@ -139,17 +143,27 @@ namespace ALRS.Controllers
                         VictimName = alert.Victim.VictimName,
                         VictimAge = alert.Victim.VictimAge,
                         VictimSex = alert.Victim.VictimSex,
+                        VictimSkinColor = alert.Victim.VictimSkinColor,
                         VictimHair = alert.Victim.VictimHair,
-                        VictimClothing = alert.Victim.VictimClothing
+                        VictimClothing = alert.Victim.VictimClothing,
+                        VictimDistinctiveFeatures = alert.Victim.VictimDistinctiveFeatures,
+                        VictimPhoto = (alert.Victim.VictimPhoto != null && alert.Victim.VictimPhoto.Length > 0)
+                            ? Convert.ToBase64String(alert.Victim.VictimPhoto)
+                            : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
                     },
                     Abductor = new GetAlertByIdAbductorDto
                     {
                         AbductorName = alert.Abductor?.AbductorName,
                         AbductorAge = alert.Abductor?.AbductorAge ?? 0,
                         AbductorSex = alert.Abductor?.AbductorSex,
+                        AbductorSkinColor = alert.Abductor?.AbductorSkinColor,
                         AbductorHair = alert.Abductor?.AbductorHair,
                         AbductorClothing = alert.Abductor?.AbductorClothing,
-                        AbductorVehicle = alert.Abductor?.AbductorVehicle
+                        AbductorDistinctiveFeatures = alert.Abductor?.AbductorDistinctiveFeatures,
+                        AbductorVehicle = alert.Abductor?.AbductorVehicle,
+                        AbductorPhoto = (alert.Abductor?.AbductorPhoto != null && alert.Abductor?.AbductorPhoto.Length > 0)
+                            ? Convert.ToBase64String(alert.Abductor.AbductorPhoto)
+                            : Convert.ToBase64String(GetPlaceholderImageBytes("abductor"))
                     }
                 };
 
@@ -235,8 +249,13 @@ namespace ALRS.Controllers
                     existingAlert.Victim.VictimName = dto.Victim.VictimName;
                     existingAlert.Victim.VictimAge = dto.Victim.VictimAge;
                     existingAlert.Victim.VictimSex = dto.Victim.VictimSex;
+                    existingAlert.Victim.VictimSkinColor = dto.Victim.VictimSkinColor;
                     existingAlert.Victim.VictimHair = dto.Victim.VictimHair;
                     existingAlert.Victim.VictimClothing = dto.Victim.VictimClothing;
+                    existingAlert.Victim.VictimDistinctiveFeatures = dto.Victim.VictimDistinctiveFeatures;
+                    existingAlert.Victim.VictimPhoto = string.IsNullOrEmpty(dto.Victim.VictimPhoto)
+                            ? GetPlaceholderImageBytes("victim")
+                            : Convert.FromBase64String(dto.Victim.VictimPhoto);
                 }
 
                 if (existingAlert.Abductor != null && dto.Abductor != null)
@@ -244,9 +263,14 @@ namespace ALRS.Controllers
                     existingAlert.Abductor.AbductorName = dto.Abductor.AbductorName;
                     existingAlert.Abductor.AbductorAge = dto.Abductor.AbductorAge;
                     existingAlert.Abductor.AbductorSex = dto.Abductor.AbductorSex;
+                    existingAlert.Abductor.AbductorSkinColor = dto.Abductor.AbductorSkinColor;
                     existingAlert.Abductor.AbductorHair = dto.Abductor.AbductorHair;
                     existingAlert.Abductor.AbductorClothing = dto.Abductor.AbductorClothing;
+                    existingAlert.Abductor.AbductorDistinctiveFeatures = dto.Abductor.AbductorDistinctiveFeatures;
                     existingAlert.Abductor.AbductorVehicle = dto.Abductor.AbductorVehicle;
+                    existingAlert.Abductor.AbductorPhoto = string.IsNullOrEmpty(dto.Abductor.AbductorPhoto)
+                            ? GetPlaceholderImageBytes("abductor")
+                            : Convert.FromBase64String(dto.Abductor.AbductorPhoto);
                 }
 
                 await _context.SaveChangesAsync();
@@ -320,8 +344,10 @@ namespace ALRS.Controllers
                         VictimName = a.Victim.VictimName,
                         VictimAge = a.Victim.VictimAge,
                         VictimSex = a.Victim.VictimSex,
+                        VictimSkinColor = a.Victim.VictimSkinColor,
                         VictimHair = a.Victim.VictimHair,
                         VictimClothing = a.Victim.VictimClothing,
+                        VictimDistinctiveFeatures = a.Victim.VictimDistinctiveFeatures,
                         VictimPhoto = (a.Victim.VictimPhoto != null && a.Victim.VictimPhoto.Length > 0)
                             ? Convert.ToBase64String(a.Victim.VictimPhoto)
                             : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
@@ -331,8 +357,10 @@ namespace ALRS.Controllers
                         AbductorName = a.Abductor.AbductorName,
                         AbductorAge = a.Abductor.AbductorAge,
                         AbductorSex = a.Abductor.AbductorSex,
+                        AbductorSkinColor = a.Abductor.AbductorSkinColor,
                         AbductorHair = a.Abductor.AbductorHair,
                         AbductorClothing = a.Abductor.AbductorClothing,
+                        AbductorDistinctiveFeatures = a.Abductor.AbductorDistinctiveFeatures,
                         AbductorVehicle = a.Abductor.AbductorVehicle,
                         AbductorPhoto = (a.Abductor.AbductorPhoto != null && a.Abductor.AbductorPhoto.Length > 0)
                             ? Convert.ToBase64String(a.Abductor.AbductorPhoto)

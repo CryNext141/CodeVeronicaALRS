@@ -37,6 +37,10 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("AbductorDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AbductorHair")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -50,6 +54,10 @@ namespace ALRS.Data.Migrations
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("AbductorSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorSkinColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -160,8 +168,9 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CitizenContactPhone")
-                        .HasColumnType("int");
+                    b.Property<string>("CitizenContactPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CitizenName")
                         .IsRequired()
@@ -287,6 +296,10 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("VictimDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("VictimHair")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -300,6 +313,10 @@ namespace ALRS.Data.Migrations
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("VictimSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimSkinColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

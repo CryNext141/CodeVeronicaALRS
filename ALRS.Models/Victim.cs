@@ -6,8 +6,10 @@
         public string VictimName { get; set; }
         public int VictimAge { get; set; }
         public string VictimSex { get; set; }
+        public string VictimSkinColor { get; set; }
         public string VictimHair {  get; set; }
         public string VictimClothing {  get; set; }
+        public string VictimDistinctiveFeatures { get; set; }
         public byte[] VictimPhoto { get; set; }
 
         public int AlertId { get; set; }
