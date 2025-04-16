@@ -90,9 +90,8 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertStatus")
                         .HasColumnType("int");
 
-                    b.Property<string>("CrimeDate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("CrimeDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("CrimeDistrict")
                         .IsRequired()
@@ -101,6 +100,9 @@ namespace ALRS.Data.Migrations
                     b.Property<string>("CrimeLocation")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("CrimeTime")
+                        .HasColumnType("time");
 
                     b.Property<int?>("VictimId")
                         .HasColumnType("int");

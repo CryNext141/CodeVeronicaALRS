@@ -5,7 +5,7 @@
         public int AlertStatus { get; set; }
         public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
-        public string CrimeDate { get; set; }
+        public CrimeDateDto CrimeDate { get; set; }
         public CreateAlertVictimDto Victim { get; set; }
         public CreateAlertAbductorDto Abductor { get; set; }
 

@@ -22,7 +22,15 @@ namespace ALRS.Data
                 .HasOne(a => a.Abductor)
                 .WithOne(ab => ab.Alert)
                 .HasForeignKey<Abductor>(ab => ab.AlertId);
-           
+
+            modelBuilder.Entity<Alert>()
+                .Property(a => a.CrimeDate)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<Alert>()
+                .Property(a => a.CrimeTime)
+                .HasColumnType("time");
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -31,7 +39,7 @@ namespace ALRS.Data
         public DbSet<Abductor> Abductor { get; set; }
         public DbSet<CitizenReport> CitizenReport { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
-        public DbSet <AuditLog> AuditLogs { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
     }
 }

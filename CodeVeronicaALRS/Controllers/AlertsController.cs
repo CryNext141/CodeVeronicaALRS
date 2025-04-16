@@ -4,6 +4,7 @@ using ALRS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ALRS.Controllers
 {
@@ -47,6 +48,14 @@ namespace ALRS.Controllers
         {
             _logger.LogInformation("Entering {Action} with alert data: {@Dto}", nameof(CreateAlert), dto);
 
+            var datePart = DateTime.ParseExact(dto.CrimeDate.Date,
+                                           "dd.MM.yyyy",
+                                           CultureInfo.InvariantCulture);
+
+            var timePart = TimeSpan.ParseExact(dto.CrimeDate.Time,
+                                           @"hh\:mm",
+                                           CultureInfo.InvariantCulture);
+
             try
             {
                 var alert = new Alert
@@ -54,7 +63,8 @@ namespace ALRS.Controllers
                     AlertStatus = dto.AlertStatus,
                     CrimeDistrict = string.IsNullOrWhiteSpace(dto.CrimeDistrict) ? "Unknown" : dto.CrimeDistrict,
                     CrimeLocation = string.IsNullOrWhiteSpace(dto.CrimeLocation) ? "Unknown" : dto.CrimeLocation,
-                    CrimeDate = string.IsNullOrEmpty(dto.CrimeDate) ? "Unknown" : dto.CrimeDate,
+                    CrimeDate = datePart,
+                    CrimeTime = timePart,
                 };
 
                 var victim = new Victim
@@ -116,6 +126,7 @@ namespace ALRS.Controllers
         {
             _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlertById), id);
 
+           
 
             try
             {
@@ -130,13 +141,18 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
+                var crimeDateDto = new CrimeDateDto
+                {
+                    Date = alert.CrimeDate.ToString("dd.MM.yyyy"),
+                    Time = alert.CrimeTime.ToString(@"hh\:mm")
+                };
 
-                var alertDto = new GetAlertById
+                var alertDto = new GetAlertByIdDto
                 {
                     AlertStatus = alert.AlertStatus,
                     CrimeDistrict = alert.CrimeDistrict,
                     CrimeLocation = alert.CrimeLocation,
-                    CrimeDate = alert.CrimeDate,
+                    CrimeDate = crimeDateDto,
 
                     Victim = new GetAlertByIdVictimDto
                     {
@@ -239,10 +255,32 @@ namespace ALRS.Controllers
 
                 _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
+                
+
                 existingAlert.AlertStatus = dto.AlertStatus;
                 existingAlert.CrimeDistrict = dto.CrimeDistrict;
                 existingAlert.CrimeLocation = dto.CrimeLocation;
-                existingAlert.CrimeDate = dto.CrimeDate;
+
+
+                if (dto.CrimeDate != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(dto.CrimeDate.Date))
+                    {
+                        existingAlert.CrimeDate = DateTime.ParseExact(
+                            dto.CrimeDate.Date,
+                            "dd.MM.yyyy",
+                            CultureInfo.InvariantCulture
+                        );
+                    }
+                    if (!string.IsNullOrWhiteSpace(dto.CrimeDate.Time))
+                    {
+                        existingAlert.CrimeTime = TimeSpan.ParseExact(
+                            dto.CrimeDate.Time,
+                            @"hh\:mm",
+                            CultureInfo.InvariantCulture
+                        );
+                    }
+                }
 
                 if (existingAlert.Victim != null && dto.Victim != null)
                 {
@@ -332,13 +370,19 @@ namespace ALRS.Controllers
                     .Include(a => a.Abductor)
                     .ToListAsync();
 
-                var result = alerts.Select(a => new GetAlertById
+                var result = alerts.Select(a => new GetAlertByIdDto
                 {
                     AlertId = a.AlertId,
                     AlertStatus = a.AlertStatus,
                     CrimeDistrict = a.CrimeDistrict,
                     CrimeLocation = a.CrimeLocation,
-                    CrimeDate = a.CrimeDate,
+
+                    CrimeDate = new CrimeDateDto
+                    {
+                        Date = a.CrimeDate.ToString("dd.MM.yyyy"),
+                        Time = a.CrimeTime.ToString(@"hh\:mm")
+                    },
+
                     Victim = new GetAlertByIdVictimDto
                     {
                         VictimName = a.Victim.VictimName,
