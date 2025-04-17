@@ -17,7 +17,7 @@ namespace ALRS.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -37,6 +37,10 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("AbductorDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AbductorHair")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -45,7 +49,15 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("AbductorPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("AbductorSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorSkinColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -78,7 +90,10 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertStatus")
                         .HasColumnType("int");
 
-                    b.Property<string>("CrimeDate")
+                    b.Property<DateTime>("CrimeDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("CrimeDistrict")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -86,12 +101,42 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<TimeSpan>("CrimeTime")
+                        .HasColumnType("time");
+
                     b.Property<int?>("VictimId")
                         .HasColumnType("int");
 
                     b.HasKey("AlertId");
 
                     b.ToTable("Alert");
+                });
+
+            modelBuilder.Entity("ALRS.Models.AuditLog", b =>
+                {
+                    b.Property<int>("AuditLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditLogId"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseStatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AuditLogId");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("ALRS.Models.BlacklistedToken", b =>
@@ -125,14 +170,11 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CitizenContactPhone")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CitizenName")
+                    b.Property<string>("CitizenContactPhone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Date")
+                    b.Property<string>("CitizenName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -146,6 +188,12 @@ namespace ALRS.Data.Migrations
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReportDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("ReportTime")
+                        .HasColumnType("time");
 
                     b.HasKey("CitizenReportId");
 
@@ -252,6 +300,10 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("VictimDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("VictimHair")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -260,7 +312,15 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("VictimPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("VictimSex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimSkinColor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

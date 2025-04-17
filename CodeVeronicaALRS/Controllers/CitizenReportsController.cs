@@ -2,6 +2,7 @@
 using ALRS.DTO;
 using ALRS.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace ALRS.Controllers
 {
@@ -38,12 +39,28 @@ namespace ALRS.Controllers
                     return NotFound(new { message = $"Alert with ID {alertId} not found." });
                 }
 
+                DateTime reportDate = DateTime.Today;
+                TimeSpan reportTime = TimeSpan.Zero;
+                if (citizenReportsDto.ReportDate != null)
+                {
+                    reportDate = DateTime.ParseExact(
+                        citizenReportsDto.ReportDate.Date,
+                        "dd.MM.yyyy",
+                        CultureInfo.InvariantCulture);
+
+                    reportTime = TimeSpan.ParseExact(
+                        citizenReportsDto.ReportDate.Time,
+                        @"hh\:mm",
+                        CultureInfo.InvariantCulture);
+                }
+
                 var childCitizenReport = new CitizenReport
                 {
                     CitizenName = string.IsNullOrWhiteSpace(citizenReportsDto.CitizenName) ? "Unknown" : citizenReportsDto.CitizenName,
-                    CitizenContactPhone = citizenReportsDto.CitizenContactPhone > 0 ? citizenReportsDto.CitizenContactPhone : 0,
+                    CitizenContactPhone = string.IsNullOrWhiteSpace(citizenReportsDto.CitizenContactPhone) ? "Unknown" : citizenReportsDto.CitizenContactPhone,
                     Location = citizenReportsDto.Location,
-                    Date = citizenReportsDto.Date,
+                    ReportDate = reportDate,
+                    ReportTime = reportTime,
                     Description = citizenReportsDto.Description,
                     IsAnonymous = citizenReportsDto.IsAnonymous,
                     AlertId = alertId

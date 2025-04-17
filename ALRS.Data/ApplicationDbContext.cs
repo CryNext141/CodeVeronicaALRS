@@ -9,7 +9,6 @@ namespace ALRS.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,7 +22,23 @@ namespace ALRS.Data
                 .HasOne(a => a.Abductor)
                 .WithOne(ab => ab.Alert)
                 .HasForeignKey<Abductor>(ab => ab.AlertId);
-           
+
+            modelBuilder.Entity<Alert>()
+                .Property(a => a.CrimeDate)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<Alert>()
+                .Property(a => a.CrimeTime)
+                .HasColumnType("time");
+
+            modelBuilder.Entity<CitizenReport>()
+                .Property(r => r.ReportDate)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<CitizenReport>()
+                .Property(r => r.ReportTime)
+                .HasColumnType("time");
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -32,5 +47,7 @@ namespace ALRS.Data
         public DbSet<Abductor> Abductor { get; set; }
         public DbSet<CitizenReport> CitizenReport { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
     }
 }

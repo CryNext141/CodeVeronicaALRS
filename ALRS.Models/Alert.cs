@@ -4,8 +4,10 @@
     {
         public int AlertId { get; set; }
         public int AlertStatus { get; set; }
+        public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
-        public string CrimeDate { get; set; }
+        public DateTime CrimeDate { get; set; } 
+        public TimeSpan CrimeTime { get; set; }
         public Victim Victim { get; set; }
         public Abductor Abductor { get; set; }
         public ICollection<CitizenReport> CitizenReports { get; set; }
