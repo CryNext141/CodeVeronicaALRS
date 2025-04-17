@@ -212,19 +212,24 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
-                var citizenReportDtos = citizenReports.Select(citizenReport => new CitizenReportsDto
+               
+
+                var citizenReportDto = citizenReports.Select(citizenReport => new CitizenReportsDto
                 {
-                    CitizenReportId = citizenReport.CitizenReportId,
                     CitizenName = citizenReport.CitizenName,
                     CitizenContactPhone = citizenReport.CitizenContactPhone,
                     Location = citizenReport.Location,
-                    Date = citizenReport.Date,
+                    ReportDate = new ReportDateDto
+                    {
+                        Date = citizenReport.ReportDate.ToString("dd.MM.yyyy"),
+                        Time = citizenReport.ReportTime.ToString(@"hh\:mm")
+                    },
                     Description = citizenReport.Description,
                     IsAnonymous = citizenReport.IsAnonymous
                 }).ToList();
 
                 _logger.LogInformation("User reports for alert with ID {AlertId} retrieved successfully.", id);
-                return Ok(citizenReportDtos);
+                return Ok(citizenReportDto);
             }
             catch (Exception ex)
             {

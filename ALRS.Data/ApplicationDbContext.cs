@@ -31,6 +31,14 @@ namespace ALRS.Data
                 .Property(a => a.CrimeTime)
                 .HasColumnType("time");
 
+            modelBuilder.Entity<CitizenReport>()
+                .Property(r => r.ReportDate)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<CitizenReport>()
+                .Property(r => r.ReportTime)
+                .HasColumnType("time");
+
             base.OnModelCreating(modelBuilder);
         }
 
