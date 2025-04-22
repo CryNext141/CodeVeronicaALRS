@@ -439,6 +439,216 @@ namespace ALRS.Controllers
                 _logger.LogError(ex, "An error occurred while getting all alerts.");
                 return StatusCode(500, new { message = "An error occurred while getting all alerts.", error = ex.Message });
             }
+
+        }
+
+        [HttpPost("alert/{id}/archive")]
+        public async Task<IActionResult> ArchiveAlert(int id)
+        {
+            _logger.LogInformation("Entering {Action} to archive alert with ID {AlertId}", nameof(ArchiveAlert), id);
+
+            try
+            {
+                var alert = await _context.Alert
+                    .Include(a => a.Victim)
+                    .Include(a => a.Abductor)
+                    .FirstOrDefaultAsync(a => a.AlertId == id);
+
+                if (alert == null)
+                {
+                    _logger.LogWarning("Alert with ID {AlertId} not found.", id);
+                    return NotFound(new { message = $"Alert {id} not found." });
+                }
+
+                _logger.LogInformation("Found alert {AlertId}. Preparing to archive.", id);
+
+                var archive = new AlertArchive
+                {
+                    AlertId = alert.AlertId,
+                    AlertStatus = alert.AlertStatus,
+                    CrimeDistrict = alert.CrimeDistrict,
+                    CrimeLocation = alert.CrimeLocation,
+                    CrimeDate = alert.CrimeDate,
+                    CrimeTime = alert.CrimeTime,
+
+                    VictimName = alert.Victim?.VictimName,
+                    VictimAge = alert.Victim?.VictimAge,
+                    VictimGenderId = alert.Victim?.GenderId,
+                    VictimSkinColorId = alert.Victim?.SkinColorId,
+                    VictimHair = alert.Victim?.VictimHair,
+                    VictimClothing = alert.Victim?.VictimClothing,
+                    VictimDistinctiveFeatures = alert.Victim?.VictimDistinctiveFeatures,
+                    VictimPhoto = alert.Victim?.VictimPhoto,
+
+                    AbductorName = alert.Abductor?.AbductorName,
+                    AbductorAge = alert.Abductor?.AbductorAge,
+                    AbductorGenderId = alert.Abductor?.GenderId,
+                    AbductorSkinColorId = alert.Abductor?.SkinColorId,
+                    AbductorHair = alert.Abductor?.AbductorHair,
+                    AbductorClothing = alert.Abductor?.AbductorClothing,
+                    AbductorDistinctiveFeatures = alert.Abductor?.AbductorDistinctiveFeatures,
+                    AbductorVehicle = alert.Abductor?.AbductorVehicle,
+                    AbductorPhoto = alert.Abductor?.AbductorPhoto
+                };
+
+                _context.AlertArchive.Add(archive);
+                _context.Alert.Remove(alert);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Alert with ID {AlertId} archived successfully.", id);
+                return Ok(new { message = $"Alert {id} archived." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while archiving alert with ID {AlertId}.", id);
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while archiving the alert.",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+        [HttpPost("alerts/archive/inactive")]
+        public async Task<IActionResult> ArchiveInactiveAlerts()
+        {
+            _logger.LogInformation("Entering {Action} to archive inactive alerts", nameof(ArchiveInactiveAlerts));
+
+            try
+            {
+                var toArchive = await _context.Alert
+                    .Where(a => a.AlertStatus == 1 || a.AlertStatus == 2)
+                    .Include(a => a.Victim)
+                    .Include(a => a.Abductor)
+                    .ToListAsync();
+
+                if (!toArchive.Any())
+                {
+                    _logger.LogWarning("No inactive alerts found to archive.");
+                    return Ok(new { message = "No inactive alerts to archive." });
+                }
+
+                _logger.LogInformation("Found {Count} inactive alerts to archive.", toArchive.Count);
+
+                var archives = toArchive.Select(alert => new AlertArchive
+                {
+                    AlertId = alert.AlertId,
+                    AlertStatus = alert.AlertStatus,
+                    CrimeDistrict = alert.CrimeDistrict,
+                    CrimeLocation = alert.CrimeLocation,
+                    CrimeDate = alert.CrimeDate,
+                    CrimeTime = alert.CrimeTime,
+
+                    VictimName = alert.Victim?.VictimName,
+                    VictimAge = alert.Victim?.VictimAge,
+                    VictimGenderId = alert.Victim?.GenderId,
+                    VictimSkinColorId = alert.Victim?.SkinColorId,
+                    VictimHair = alert.Victim?.VictimHair,
+                    VictimClothing = alert.Victim?.VictimClothing,
+                    VictimDistinctiveFeatures = alert.Victim?.VictimDistinctiveFeatures,
+                    VictimPhoto = alert.Victim?.VictimPhoto,
+
+                    AbductorName = alert.Abductor?.AbductorName,
+                    AbductorAge = alert.Abductor?.AbductorAge,
+                    AbductorGenderId = alert.Abductor?.GenderId,
+                    AbductorSkinColorId = alert.Abductor?.SkinColorId,
+                    AbductorHair = alert.Abductor?.AbductorHair,
+                    AbductorClothing = alert.Abductor?.AbductorClothing,
+                    AbductorDistinctiveFeatures = alert.Abductor?.AbductorDistinctiveFeatures,
+                    AbductorVehicle = alert.Abductor?.AbductorVehicle,
+                    AbductorPhoto = alert.Abductor?.AbductorPhoto
+                }).ToList();
+
+                _context.AlertArchive.AddRange(archives);
+                _context.Alert.RemoveRange(toArchive);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Archived {Count} alerts successfully.", archives.Count);
+                return Ok(new { message = $"{archives.Count} alerts archived." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while archiving inactive alerts.");
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while archiving inactive alerts.",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+        [HttpGet("alerts/archive")]
+        public async Task<IActionResult> GetArchivedAlerts()
+        {
+            _logger.LogInformation("Entering {Action} to get archived alerts", nameof(GetArchivedAlerts));
+
+            try
+            {
+                var query = from a in _context.AlertArchive.AsNoTracking()
+                            join vg in _context.Genders on a.VictimGenderId equals vg.GenderId into vgJ
+                            from vg in vgJ.DefaultIfEmpty()
+                            join vs in _context.SkinColors on a.VictimSkinColorId equals vs.SkinColorId into vsJ
+                            from vs in vsJ.DefaultIfEmpty()
+                            join ag in _context.Genders on a.AbductorGenderId equals ag.GenderId into agJ
+                            from ag in agJ.DefaultIfEmpty()
+                            join asg in _context.SkinColors on a.AbductorSkinColorId equals asg.SkinColorId into asgJ
+                            from asg in asgJ.DefaultIfEmpty()
+                            select new AlertArchiveDto
+                            {
+                                AlertId = a.AlertId,
+                                AlertStatus = a.AlertStatus,
+                                CrimeDistrict = a.CrimeDistrict,
+                                CrimeLocation = a.CrimeLocation,
+                                CrimeDate = new CrimeDateDto
+                                {
+                                    Date = a.CrimeDate.ToString("dd.MM.yyyy"),
+                                    Time = a.CrimeTime.ToString(@"hh\:mm")
+                                },
+                                Victim = new VictimArchiveDto
+                                {
+                                    VictimName = a.VictimName,
+                                    VictimAge = a.VictimAge,
+                                    VictimGender = vg != null ? vg.DisplayName : null,
+                                    VictimSkinColor = vs != null ? vs.Name : null,
+                                    VictimHair = a.VictimHair,
+                                    VictimClothing = a.VictimClothing,
+                                    VictimDistinctiveFeatures = a.VictimDistinctiveFeatures,
+                                    VictimPhoto = a.VictimPhoto != null && a.VictimPhoto.Length > 0
+                                                  ? Convert.ToBase64String(a.VictimPhoto)
+                                                  : null
+                                },
+                                Abductor = new AbductorArchiveDto
+                                {
+                                    AbductorName = a.AbductorName,
+                                    AbductorAge = a.AbductorAge,
+                                    AbductorGender = ag != null ? ag.DisplayName : null,
+                                    AbductorSkinColor = asg != null ? asg.Name : null,
+                                    AbductorHair = a.AbductorHair,
+                                    AbductorClothing = a.AbductorClothing,
+                                    AbductorDistinctiveFeatures = a.AbductorDistinctiveFeatures,
+                                    AbductorVehicle = a.AbductorVehicle,
+                                    AbductorPhoto = a.AbductorPhoto != null && a.AbductorPhoto.Length > 0
+                                                    ? Convert.ToBase64String(a.AbductorPhoto)
+                                                    : null
+                                }
+                            };
+
+                var result = await query.ToListAsync();
+
+                _logger.LogInformation("Retrieved {Count} archived alerts.", result.Count);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting archived alerts.");
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while getting archived alerts.",
+                    error = ex.Message
+                });
+            }
         }
     }
 }

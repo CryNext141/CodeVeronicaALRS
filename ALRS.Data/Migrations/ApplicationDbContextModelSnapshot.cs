@@ -114,6 +114,95 @@ namespace ALRS.Data.Migrations
                     b.ToTable("Alert");
                 });
 
+            modelBuilder.Entity("ALRS.Models.AlertArchive", b =>
+                {
+                    b.Property<int>("AlertId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AbductorAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AbductorClothing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("AbductorGenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AbductorHair")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AbductorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("AbductorPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int?>("AbductorSkinColorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AbductorVehicle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("AlertStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CrimeDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CrimeDistrict")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CrimeLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("CrimeTime")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("VictimAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VictimClothing")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimDistinctiveFeatures")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("VictimGenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VictimHair")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VictimName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("VictimPhoto")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int?>("VictimSkinColorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AlertId");
+
+                    b.ToTable("AlertArchive");
+                });
+
             modelBuilder.Entity("ALRS.Models.AuditLog", b =>
                 {
                     b.Property<int>("AuditLogId")
