@@ -53,14 +53,6 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("AbductorSex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AbductorSkinColor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("AbductorVehicle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -68,10 +60,20 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertId")
                         .HasColumnType("int");
 
+                    b.Property<int>("GenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkinColorId")
+                        .HasColumnType("int");
+
                     b.HasKey("AbductorId");
 
                     b.HasIndex("AlertId")
                         .IsUnique();
+
+                    b.HasIndex("GenderId");
+
+                    b.HasIndex("SkinColorId");
 
                     b.ToTable("Abductor");
                 });
@@ -202,6 +204,86 @@ namespace ALRS.Data.Migrations
                     b.ToTable("CitizenReport");
                 });
 
+            modelBuilder.Entity("ALRS.Models.Gender", b =>
+                {
+                    b.Property<int>("GenderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GenderId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GenderId");
+
+                    b.ToTable("Genders");
+
+                    b.HasData(
+                        new
+                        {
+                            GenderId = 1,
+                            Code = "M",
+                            DisplayName = "Male"
+                        },
+                        new
+                        {
+                            GenderId = 2,
+                            Code = "F",
+                            DisplayName = "Female"
+                        },
+                        new
+                        {
+                            GenderId = 3,
+                            Code = "U",
+                            DisplayName = "Unknown"
+                        });
+                });
+
+            modelBuilder.Entity("ALRS.Models.SkinColor", b =>
+                {
+                    b.Property<int>("SkinColorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SkinColorId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SkinColorId");
+
+                    b.ToTable("SkinColors");
+
+                    b.HasData(
+                        new
+                        {
+                            SkinColorId = 1,
+                            Name = "Light"
+                        },
+                        new
+                        {
+                            SkinColorId = 2,
+                            Name = "Medium"
+                        },
+                        new
+                        {
+                            SkinColorId = 3,
+                            Name = "Dark"
+                        },
+                        new
+                        {
+                            SkinColorId = 4,
+                            Name = "Unknown"
+                        });
+                });
+
             modelBuilder.Entity("ALRS.Models.Users", b =>
                 {
                     b.Property<string>("Id")
@@ -293,6 +375,12 @@ namespace ALRS.Data.Migrations
                     b.Property<int>("AlertId")
                         .HasColumnType("int");
 
+                    b.Property<int>("GenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkinColorId")
+                        .HasColumnType("int");
+
                     b.Property<int>("VictimAge")
                         .HasColumnType("int");
 
@@ -316,18 +404,14 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("VictimSex")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VictimSkinColor")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("VictimId");
 
                     b.HasIndex("AlertId")
                         .IsUnique();
+
+                    b.HasIndex("GenderId");
+
+                    b.HasIndex("SkinColorId");
 
                     b.ToTable("Victim");
                 });
@@ -473,7 +557,23 @@ namespace ALRS.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ALRS.Models.Gender", "Gender")
+                        .WithMany("Abductors")
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ALRS.Models.SkinColor", "SkinColor")
+                        .WithMany("Abductors")
+                        .HasForeignKey("SkinColorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Alert");
+
+                    b.Navigation("Gender");
+
+                    b.Navigation("SkinColor");
                 });
 
             modelBuilder.Entity("ALRS.Models.CitizenReport", b =>
@@ -495,7 +595,23 @@ namespace ALRS.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ALRS.Models.Gender", "Gender")
+                        .WithMany("Victims")
+                        .HasForeignKey("GenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ALRS.Models.SkinColor", "SkinColor")
+                        .WithMany("Victims")
+                        .HasForeignKey("SkinColorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Alert");
+
+                    b.Navigation("Gender");
+
+                    b.Navigation("SkinColor");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -558,6 +674,20 @@ namespace ALRS.Data.Migrations
 
                     b.Navigation("Victim")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ALRS.Models.Gender", b =>
+                {
+                    b.Navigation("Abductors");
+
+                    b.Navigation("Victims");
+                });
+
+            modelBuilder.Entity("ALRS.Models.SkinColor", b =>
+                {
+                    b.Navigation("Abductors");
+
+                    b.Navigation("Victims");
                 });
 #pragma warning restore 612, 618
         }

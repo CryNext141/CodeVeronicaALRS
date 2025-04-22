@@ -39,6 +39,18 @@ namespace ALRS.Data
                 .Property(r => r.ReportTime)
                 .HasColumnType("time");
 
+            modelBuilder.Entity<Gender>().HasData(
+               new Gender { GenderId = 1, Code = "M", DisplayName = "Male" },
+               new Gender { GenderId = 2, Code = "F", DisplayName = "Female" },
+               new Gender { GenderId = 3, Code = "U", DisplayName = "Unknown" }
+            );
+            modelBuilder.Entity<SkinColor>().HasData(
+                new SkinColor { SkinColorId = 1, Name = "Light" },
+                new SkinColor { SkinColorId = 2, Name = "Medium" },
+                new SkinColor { SkinColorId = 3, Name = "Dark" },
+                new SkinColor { SkinColorId = 4, Name = "Unknown" }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -48,6 +60,8 @@ namespace ALRS.Data
         public DbSet<CitizenReport> CitizenReport { get; set; }
         public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<Gender> Genders { get; set; }
+        public DbSet<SkinColor> SkinColors { get; set; }
 
     }
 }
