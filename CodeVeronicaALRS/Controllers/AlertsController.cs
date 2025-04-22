@@ -60,7 +60,7 @@ namespace ALRS.Controllers
             {
                 var alert = new Alert
                 {
-                    AlertStatus = dto.AlertStatus,
+                    AlertStatusId = dto.AlertStatusId,
                     CrimeDistrict = string.IsNullOrWhiteSpace(dto.CrimeDistrict) ? "Unknown" : dto.CrimeDistrict,
                     CrimeLocation = string.IsNullOrWhiteSpace(dto.CrimeLocation) ? "Unknown" : dto.CrimeLocation,
                     CrimeDate = datePart,
@@ -155,7 +155,7 @@ namespace ALRS.Controllers
 
                 var alertDto = new GetAlertByIdDto
                 {
-                    AlertStatus = alert.AlertStatus,
+                    AlertStatus = alert.AlertStatus.DisplayName,
                     CrimeDistrict = alert.CrimeDistrict,
                     CrimeLocation = alert.CrimeLocation,
                     CrimeDate = crimeDateDto,
@@ -268,7 +268,7 @@ namespace ALRS.Controllers
 
 
 
-                existingAlert.AlertStatus = dto.AlertStatus;
+                existingAlert.AlertStatusId = dto.AlertStatusId;
                 existingAlert.CrimeDistrict = dto.CrimeDistrict;
                 existingAlert.CrimeLocation = dto.CrimeLocation;
 
@@ -349,13 +349,13 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
-                if (alert.AlertStatus == 1)
+                if (alert.AlertStatusId == 2)
                 {
                     _logger.LogInformation("Alert with ID {AlertsId} already closed.", id);
                     return Ok("Alert dont need to be closed");
                 }
 
-                alert.AlertStatus = 1;
+                alert.AlertStatusId = 2;
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Alert with ID {AlertId} closed successfully.", id);
@@ -377,6 +377,7 @@ namespace ALRS.Controllers
             try
             {
                 var alerts = await _context.Alert
+                                    .Include(a => a.AlertStatus)
                                     .Include(a => a.Victim)
                                     .ThenInclude(v => v.Gender)
                                     .Include(a => a.Victim)
@@ -392,7 +393,7 @@ namespace ALRS.Controllers
                 var result = alerts.Select(a => new GetAlertByIdDto
                 {
                     AlertId = a.AlertId,
-                    AlertStatus = a.AlertStatus,
+                    AlertStatus = a.AlertStatus.DisplayName,
                     CrimeDistrict = a.CrimeDistrict,
                     CrimeLocation = a.CrimeLocation,
 
@@ -465,7 +466,7 @@ namespace ALRS.Controllers
                 var archive = new AlertArchive
                 {
                     AlertId = alert.AlertId,
-                    AlertStatus = alert.AlertStatus,
+                    AlertStatusId = alert.AlertStatusId,
                     CrimeDistrict = alert.CrimeDistrict,
                     CrimeLocation = alert.CrimeLocation,
                     CrimeDate = alert.CrimeDate,
@@ -518,7 +519,7 @@ namespace ALRS.Controllers
             try
             {
                 var toArchive = await _context.Alert
-                    .Where(a => a.AlertStatus == 1 || a.AlertStatus == 2)
+                    .Where(a => a.AlertStatusId == 2 || a.AlertStatusId == 3)
                     .Include(a => a.Victim)
                     .Include(a => a.Abductor)
                     .ToListAsync();
@@ -534,7 +535,7 @@ namespace ALRS.Controllers
                 var archives = toArchive.Select(alert => new AlertArchive
                 {
                     AlertId = alert.AlertId,
-                    AlertStatus = alert.AlertStatus,
+                    AlertStatusId = alert.AlertStatusId,
                     CrimeDistrict = alert.CrimeDistrict,
                     CrimeLocation = alert.CrimeLocation,
                     CrimeDate = alert.CrimeDate,
@@ -598,7 +599,7 @@ namespace ALRS.Controllers
                             select new AlertArchiveDto
                             {
                                 AlertId = a.AlertId,
-                                AlertStatus = a.AlertStatus,
+                                AlertStatusId = a.AlertStatusId,
                                 CrimeDistrict = a.CrimeDistrict,
                                 CrimeLocation = a.CrimeLocation,
                                 CrimeDate = new CrimeDateDto

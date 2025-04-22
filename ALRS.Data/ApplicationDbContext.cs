@@ -55,6 +55,12 @@ namespace ALRS.Data
                 .Property(a => a.AlertId)
                 .ValueGeneratedNever();
 
+            modelBuilder.Entity<AlertStatus>().HasData(
+            new AlertStatus { AlertStatusId = 1, Code = "ACTIVE", DisplayName = "Active" },
+            new AlertStatus { AlertStatusId = 2, Code = "CLOSED", DisplayName = "Closed" },
+            new AlertStatus { AlertStatusId = 3, Code = "CANCELLED", DisplayName = "Cancelled" }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
 

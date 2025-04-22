@@ -2,7 +2,7 @@
 {
     public class CreateAlertDto
     {
-        public int AlertStatus { get; set; }
+        public int AlertStatusId { get; set; }
         public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public CrimeDateDto CrimeDate { get; set; }

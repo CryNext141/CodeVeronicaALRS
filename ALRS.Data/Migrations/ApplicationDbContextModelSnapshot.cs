@@ -89,7 +89,7 @@ namespace ALRS.Data.Migrations
                     b.Property<int?>("AbductorId")
                         .HasColumnType("int");
 
-                    b.Property<int>("AlertStatus")
+                    b.Property<int>("AlertStatusId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CrimeDate")
@@ -110,6 +110,8 @@ namespace ALRS.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("AlertId");
+
+                    b.HasIndex("AlertStatusId");
 
                     b.ToTable("Alert");
                 });
@@ -152,7 +154,7 @@ namespace ALRS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("AlertStatus")
+                    b.Property<int?>("AlertStatusId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CrimeDate")
@@ -201,6 +203,47 @@ namespace ALRS.Data.Migrations
                     b.HasKey("AlertId");
 
                     b.ToTable("AlertArchive");
+                });
+
+            modelBuilder.Entity("ALRS.Models.AlertStatus", b =>
+                {
+                    b.Property<int>("AlertStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AlertStatusId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AlertStatusId");
+
+                    b.ToTable("AlertStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            AlertStatusId = 1,
+                            Code = "ACTIVE",
+                            DisplayName = "Active"
+                        },
+                        new
+                        {
+                            AlertStatusId = 2,
+                            Code = "CLOSED",
+                            DisplayName = "Closed"
+                        },
+                        new
+                        {
+                            AlertStatusId = 3,
+                            Code = "CANCELLED",
+                            DisplayName = "Cancelled"
+                        });
                 });
 
             modelBuilder.Entity("ALRS.Models.AuditLog", b =>
@@ -665,6 +708,17 @@ namespace ALRS.Data.Migrations
                     b.Navigation("SkinColor");
                 });
 
+            modelBuilder.Entity("ALRS.Models.Alert", b =>
+                {
+                    b.HasOne("ALRS.Models.AlertStatus", "AlertStatus")
+                        .WithMany("Alerts")
+                        .HasForeignKey("AlertStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AlertStatus");
+                });
+
             modelBuilder.Entity("ALRS.Models.CitizenReport", b =>
                 {
                     b.HasOne("ALRS.Models.Alert", "Alert")
@@ -763,6 +817,11 @@ namespace ALRS.Data.Migrations
 
                     b.Navigation("Victim")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ALRS.Models.AlertStatus", b =>
+                {
+                    b.Navigation("Alerts");
                 });
 
             modelBuilder.Entity("ALRS.Models.Gender", b =>

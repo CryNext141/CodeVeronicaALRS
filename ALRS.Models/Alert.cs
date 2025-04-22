@@ -3,7 +3,8 @@
     public class Alert
     {
         public int AlertId { get; set; }
-        public int AlertStatus { get; set; }
+        public int AlertStatusId { get; set; }     
+        public AlertStatus AlertStatus { get; set; }
         public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public DateTime CrimeDate { get; set; } 

@@ -5,7 +5,7 @@
     public class GetAlertByIdDto
     {
         public int AlertId { get; set; }
-        public int AlertStatus { get; set; }
+        public string AlertStatus { get; set; }
         public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public CrimeDateDto CrimeDate { get; set; }
