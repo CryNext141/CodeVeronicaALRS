@@ -71,8 +71,8 @@ namespace ALRS.Controllers
                 {
                     VictimName = string.IsNullOrWhiteSpace(dto.Victim.VictimName) ? "Unknown" : dto.Victim.VictimName,
                     VictimAge = dto.Victim.VictimAge > 0 ? dto.Victim.VictimAge : 0,
-                    VictimSex = string.IsNullOrWhiteSpace(dto.Victim.VictimSex) ? "Unknown" : dto.Victim.VictimSex,
-                    VictimSkinColor = string.IsNullOrWhiteSpace(dto.Victim.VictimSkinColor) ? "Unknown" : dto.Victim.VictimSkinColor,
+                    GenderId = dto.Victim.GenderId,
+                    SkinColorId = dto.Victim.SkinColorId,
                     VictimHair = string.IsNullOrWhiteSpace(dto.Victim.VictimHair) ? "Unknown" : dto.Victim.VictimHair,
                     VictimClothing = string.IsNullOrWhiteSpace(dto.Victim.VictimClothing) ? "Unknown" : dto.Victim.VictimClothing,
                     VictimDistinctiveFeatures = string.IsNullOrWhiteSpace(dto.Victim.VictimDistinctiveFeatures) ? "Unknown" : dto.Victim.VictimDistinctiveFeatures,
@@ -86,8 +86,8 @@ namespace ALRS.Controllers
                 {
                     AbductorName = string.IsNullOrWhiteSpace(dto.Abductor.AbductorName) ? "Unknown" : dto.Abductor.AbductorName,
                     AbductorAge = dto.Abductor.AbductorAge > 0 ? dto.Abductor.AbductorAge : 0,
-                    AbductorSex = string.IsNullOrWhiteSpace(dto.Abductor.AbductorSex) ? "Unknown" : dto.Abductor.AbductorSex,
-                    AbductorSkinColor = string.IsNullOrWhiteSpace(dto.Abductor.AbductorSkinColor) ? "Unknown" : dto.Abductor.AbductorSkinColor,
+                    GenderId = dto.Abductor.GenderId,
+                    SkinColorId = dto.Abductor.SkinColorId,
                     AbductorHair = string.IsNullOrWhiteSpace(dto.Abductor.AbductorHair) ? "Unknown" : dto.Abductor.AbductorHair,
                     AbductorClothing = string.IsNullOrWhiteSpace(dto.Abductor.AbductorClothing) ? "Unknown" : dto.Abductor.AbductorClothing,
                     AbductorDistinctiveFeatures = string.IsNullOrWhiteSpace(dto.Abductor.AbductorDistinctiveFeatures) ? "Unknown" : dto.Abductor.AbductorDistinctiveFeatures,
@@ -126,14 +126,20 @@ namespace ALRS.Controllers
         {
             _logger.LogInformation("Entering {Action} to retrieve alert with ID {AlertId}", nameof(GetAlertById), id);
 
-           
-
             try
             {
                 var alert = await _context.Alert
-                                   .Include(a => a.Victim)
-                                   .Include(a => a.Abductor)
-                                   .FirstOrDefaultAsync(a => a.AlertId == id);
+                                    .Include(a => a.Victim)
+                                    .ThenInclude(v => v.Gender)
+                                    .Include(a => a.Victim)
+                                    .ThenInclude(v => v.SkinColor)
+                                    .Include(a => a.Victim)
+                                    .Include(a => a.Abductor)
+                                    .ThenInclude(ab => ab.Gender)
+                                    .Include(a => a.Abductor)
+                                    .ThenInclude(ab => ab.SkinColor)
+                                    .Include(a => a.Abductor)
+                                    .FirstOrDefaultAsync(a => a.AlertId == id);
 
                 if (alert == null)
                 {
@@ -158,8 +164,8 @@ namespace ALRS.Controllers
                     {
                         VictimName = alert.Victim.VictimName,
                         VictimAge = alert.Victim.VictimAge,
-                        VictimSex = alert.Victim.VictimSex,
-                        VictimSkinColor = alert.Victim.VictimSkinColor,
+                        VictimGender = alert.Victim.Gender.DisplayName,
+                        VictimSkinColor = alert.Victim.SkinColor.Name,
                         VictimHair = alert.Victim.VictimHair,
                         VictimClothing = alert.Victim.VictimClothing,
                         VictimDistinctiveFeatures = alert.Victim.VictimDistinctiveFeatures,
@@ -171,8 +177,8 @@ namespace ALRS.Controllers
                     {
                         AbductorName = alert.Abductor?.AbductorName,
                         AbductorAge = alert.Abductor?.AbductorAge ?? 0,
-                        AbductorSex = alert.Abductor?.AbductorSex,
-                        AbductorSkinColor = alert.Abductor?.AbductorSkinColor,
+                        AbductorGender = alert.Abductor.Gender.DisplayName,
+                        AbductorSkinColor = alert.Abductor.SkinColor.Name,
                         AbductorHair = alert.Abductor?.AbductorHair,
                         AbductorClothing = alert.Abductor?.AbductorClothing,
                         AbductorDistinctiveFeatures = alert.Abductor?.AbductorDistinctiveFeatures,
@@ -212,7 +218,7 @@ namespace ALRS.Controllers
                     return NotFound();
                 }
 
-               
+
 
                 var citizenReportDto = citizenReports.Select(citizenReport => new CitizenReportsDto
                 {
@@ -260,7 +266,7 @@ namespace ALRS.Controllers
 
                 _logger.LogInformation("Current alert data: {AlertData}", existingAlert);
 
-                
+
 
                 existingAlert.AlertStatus = dto.AlertStatus;
                 existingAlert.CrimeDistrict = dto.CrimeDistrict;
@@ -291,8 +297,8 @@ namespace ALRS.Controllers
                 {
                     existingAlert.Victim.VictimName = dto.Victim.VictimName;
                     existingAlert.Victim.VictimAge = dto.Victim.VictimAge;
-                    existingAlert.Victim.VictimSex = dto.Victim.VictimSex;
-                    existingAlert.Victim.VictimSkinColor = dto.Victim.VictimSkinColor;
+                    existingAlert.Victim.GenderId = dto.Victim.GenderId;
+                    existingAlert.Victim.SkinColorId = dto.Victim.SkinColorId;
                     existingAlert.Victim.VictimHair = dto.Victim.VictimHair;
                     existingAlert.Victim.VictimClothing = dto.Victim.VictimClothing;
                     existingAlert.Victim.VictimDistinctiveFeatures = dto.Victim.VictimDistinctiveFeatures;
@@ -305,8 +311,8 @@ namespace ALRS.Controllers
                 {
                     existingAlert.Abductor.AbductorName = dto.Abductor.AbductorName;
                     existingAlert.Abductor.AbductorAge = dto.Abductor.AbductorAge;
-                    existingAlert.Abductor.AbductorSex = dto.Abductor.AbductorSex;
-                    existingAlert.Abductor.AbductorSkinColor = dto.Abductor.AbductorSkinColor;
+                    existingAlert.Abductor.GenderId = dto.Abductor.GenderId;
+                    existingAlert.Abductor.SkinColorId = dto.Abductor.SkinColorId;
                     existingAlert.Abductor.AbductorHair = dto.Abductor.AbductorHair;
                     existingAlert.Abductor.AbductorClothing = dto.Abductor.AbductorClothing;
                     existingAlert.Abductor.AbductorDistinctiveFeatures = dto.Abductor.AbductorDistinctiveFeatures;
@@ -371,9 +377,17 @@ namespace ALRS.Controllers
             try
             {
                 var alerts = await _context.Alert
-                    .Include(a => a.Victim)
-                    .Include(a => a.Abductor)
-                    .ToListAsync();
+                                    .Include(a => a.Victim)
+                                    .ThenInclude(v => v.Gender)
+                                    .Include(a => a.Victim)
+                                    .ThenInclude(v => v.SkinColor)
+                                    .Include(a => a.Victim)
+                                    .Include(a => a.Abductor)
+                                    .ThenInclude(ab => ab.Gender)
+                                    .Include(a => a.Abductor)
+                                    .ThenInclude(ab => ab.SkinColor)
+                                    .Include(a => a.Abductor)
+                                    .ToListAsync();
 
                 var result = alerts.Select(a => new GetAlertByIdDto
                 {
@@ -392,8 +406,8 @@ namespace ALRS.Controllers
                     {
                         VictimName = a.Victim.VictimName,
                         VictimAge = a.Victim.VictimAge,
-                        VictimSex = a.Victim.VictimSex,
-                        VictimSkinColor = a.Victim.VictimSkinColor,
+                        VictimGender = a.Victim.Gender.DisplayName,
+                        VictimSkinColor = a.Victim.SkinColor.Name,
                         VictimHair = a.Victim.VictimHair,
                         VictimClothing = a.Victim.VictimClothing,
                         VictimDistinctiveFeatures = a.Victim.VictimDistinctiveFeatures,
@@ -405,8 +419,8 @@ namespace ALRS.Controllers
                     {
                         AbductorName = a.Abductor.AbductorName,
                         AbductorAge = a.Abductor.AbductorAge,
-                        AbductorSex = a.Abductor.AbductorSex,
-                        AbductorSkinColor = a.Abductor.AbductorSkinColor,
+                        AbductorGender = a.Abductor.Gender.DisplayName,
+                        AbductorSkinColor = a.Abductor.SkinColor.Name,
                         AbductorHair = a.Abductor.AbductorHair,
                         AbductorClothing = a.Abductor.AbductorClothing,
                         AbductorDistinctiveFeatures = a.Abductor.AbductorDistinctiveFeatures,
