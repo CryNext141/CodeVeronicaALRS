@@ -51,6 +51,10 @@ namespace ALRS.Data
                 new SkinColor { SkinColorId = 4, Name = "Unknown" }
             );
 
+            modelBuilder.Entity<AlertArchive>()
+                .Property(a => a.AlertId)
+                .ValueGeneratedNever();
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -62,6 +66,6 @@ namespace ALRS.Data
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<Gender> Genders { get; set; }
         public DbSet<SkinColor> SkinColors { get; set; }
-
+        public DbSet<AlertArchive> AlertArchive { get; set; }
     }
 }
