@@ -55,6 +55,12 @@ namespace ALRS.Data
                 .Property(a => a.AlertId)
                 .ValueGeneratedNever();
 
+            modelBuilder.Entity<AlertStatus>().HasData(
+            new AlertStatus { AlertStatusId = 1, Code = "ACTIVE", DisplayName = "Active" },
+            new AlertStatus { AlertStatusId = 2, Code = "CLOSED", DisplayName = "Closed" },
+            new AlertStatus { AlertStatusId = 3, Code = "CANCELLED", DisplayName = "Cancelled" }
+            );
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -67,5 +73,6 @@ namespace ALRS.Data
         public DbSet<Gender> Genders { get; set; }
         public DbSet<SkinColor> SkinColors { get; set; }
         public DbSet<AlertArchive> AlertArchive { get; set; }
+        public DbSet<AlertStatus> AlertStatus { get; set; }
     }
 }

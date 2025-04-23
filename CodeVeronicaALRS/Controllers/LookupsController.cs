@@ -80,6 +80,40 @@ namespace CodeVeronicaALRS.Controllers
                 });
             }
         }
-    }
 
+        [HttpGet("alert-statuses")]
+        public async Task<IActionResult> GetAlertStatuses()
+        {
+            _logger.LogInformation("Entering {Action} to retrieve alert statuses", nameof(GetAlertStatuses));
+
+            try
+            {
+                var list = await _context.AlertStatus
+                    .Select(s => new {
+                        s.AlertStatusId,
+                        s.Code,
+                        s.DisplayName
+                    })
+                    .ToListAsync();
+
+                if (list == null || !list.Any())
+                {
+                    _logger.LogWarning("No alert statuses found.");
+                    return NotFound(new { message = "No alert statuses available." });
+                }
+
+                _logger.LogInformation("Retrieved {Count} alert statuses successfully.", list.Count);
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving alert statuses.");
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while retrieving alert statuses.",
+                    error = ex.Message
+                });
+            }
+        }
+    }
 }

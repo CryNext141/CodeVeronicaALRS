@@ -3,11 +3,10 @@
     public class AlertArchiveDto
     {
         public int AlertId { get; set; }
-        public int AlertStatus { get; set; }
+        public int? AlertStatusId { get; set; }
         public string CrimeDistrict { get; set; }
         public string CrimeLocation { get; set; }
         public CrimeDateDto CrimeDate { get; set; }
-
         public VictimArchiveDto Victim { get; set; }
         public AbductorArchiveDto Abductor { get; set; }
     }
