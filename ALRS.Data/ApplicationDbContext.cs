@@ -73,5 +73,6 @@ namespace ALRS.Data
         public DbSet<Gender> Genders { get; set; }
         public DbSet<SkinColor> SkinColors { get; set; }
         public DbSet<AlertArchive> AlertArchive { get; set; }
+        public DbSet<AlertStatus> AlertStatus { get; set; }
     }
 }
