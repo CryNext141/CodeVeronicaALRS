@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewModels", "NewModels", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ALRS.NewModels", "ALRS.NewModels\ALRS.NewModels.csproj", "{155A0DC5-2DDA-4EA6-BC5E-0541A61BDDBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared.Events\Shared.csproj", "{2B3DF4D7-87F4-4DEA-B777-51E08F1AD31A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{155A0DC5-2DDA-4EA6-BC5E-0541A61BDDBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{155A0DC5-2DDA-4EA6-BC5E-0541A61BDDBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{155A0DC5-2DDA-4EA6-BC5E-0541A61BDDBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B3DF4D7-87F4-4DEA-B777-51E08F1AD31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B3DF4D7-87F4-4DEA-B777-51E08F1AD31A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B3DF4D7-87F4-4DEA-B777-51E08F1AD31A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B3DF4D7-87F4-4DEA-B777-51E08F1AD31A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

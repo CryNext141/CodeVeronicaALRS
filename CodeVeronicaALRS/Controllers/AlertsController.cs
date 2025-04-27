@@ -1,9 +1,11 @@
 ﻿using ALRS.Data;
 using ALRS.DTO;
 using ALRS.Models;
+using CodeVeronicaALRS.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Events;
 using System.Globalization;
 
 namespace ALRS.Controllers
@@ -17,13 +19,16 @@ namespace ALRS.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AlertsController> _logger;
         private readonly IWebHostEnvironment _env;
+        private readonly IEventBus _eventBus;
 
 
-        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env)
+
+        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env, IEventBus eventBus)
         {
             _context = context;
             _logger = logger;
             _env = env;
+            _eventBus = eventBus;
         }
 
         private byte[] GetPlaceholderImageBytes(string type)
@@ -104,6 +109,13 @@ namespace ALRS.Controllers
 
                 await _context.SaveChangesAsync();
 
+                var evt = new AlertCreatedEvent(
+                    alert.AlertId,
+                    alert.CrimeDistrict,
+                    $"New alert in {alert.CrimeDistrict}"
+                );
+                _eventBus.Publish(evt, "alert.created");
+
                 _logger.LogInformation("Alert created successfully: {@Alert}", alert);
 
                 return Ok(new
@@ -130,17 +142,17 @@ namespace ALRS.Controllers
             try
             {
                 var alert = await _context.Alert
-                    .Include(a => a.AlertStatus)        
+                    .Include(a => a.AlertStatus)
                     .Include(a => a.Victim)
                         .ThenInclude(v => v.Gender)
                     .Include(a => a.Victim)
                         .ThenInclude(v => v.SkinColor)
-                    
+
                     .Include(a => a.Abductor)
                         .ThenInclude(ab => ab.Gender)
                     .Include(a => a.Abductor)
                         .ThenInclude(ab => ab.SkinColor)
-         
+
                     .FirstOrDefaultAsync(a => a.AlertId == id);
 
                 if (alert == null)
