@@ -1,9 +1,11 @@
 ﻿using ALRS.Data;
 using ALRS.DTO;
 using ALRS.Models;
+using CodeVeronicaALRS.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Events;
 using System.Globalization;
 
 namespace ALRS.Controllers
@@ -17,13 +19,16 @@ namespace ALRS.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<AlertsController> _logger;
         private readonly IWebHostEnvironment _env;
+        private readonly IEventBus _eventBus;
 
 
-        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env)
+
+        public AlertsController(ApplicationDbContext context, ILogger<AlertsController> logger, IWebHostEnvironment env, IEventBus eventBus)
         {
             _context = context;
             _logger = logger;
             _env = env;
+            _eventBus = eventBus;
         }
 
         private byte[] GetPlaceholderImageBytes(string type)
@@ -104,6 +109,13 @@ namespace ALRS.Controllers
 
                 await _context.SaveChangesAsync();
 
+                var evt = new AlertCreatedEvent(
+                    alert.AlertId,
+                    alert.CrimeDistrict,
+                    $"New alert in {alert.CrimeDistrict}"
+                );
+                _eventBus.Publish(evt, "alert.created");
+
                 _logger.LogInformation("Alert created successfully: {@Alert}", alert);
 
                 return Ok(new
@@ -122,79 +134,85 @@ namespace ALRS.Controllers
 
         [Authorize(Roles = "1")]
         [HttpGet("alert/{id}")]
-        public async Task<IActionResult> GetAlertById(int id)
+        public async Task<ActionResult<IEnumerable<GetAlertByIdDto>>> GetAlertById(int id)
         {
             _logger.LogInformation("Entering {Action} to retrieve alert ID {AlertId}",
-                                    nameof(GetAlertById), id);
+                                   nameof(GetAlertById), id);
 
             try
             {
                 var alert = await _context.Alert
-                    .Include(a => a.AlertStatus)        
+                    .Include(a => a.AlertStatus)
                     .Include(a => a.Victim)
                         .ThenInclude(v => v.Gender)
                     .Include(a => a.Victim)
                         .ThenInclude(v => v.SkinColor)
-                    
+
                     .Include(a => a.Abductor)
                         .ThenInclude(ab => ab.Gender)
                     .Include(a => a.Abductor)
                         .ThenInclude(ab => ab.SkinColor)
-         
+
                     .FirstOrDefaultAsync(a => a.AlertId == id);
 
-                if (alert == null)
+                var dtoList = new List<GetAlertByIdDto>();
+
+                if (alert != null)
                 {
-                    _logger.LogWarning("Alert with ID {AlertId} not found.", id);
-                    return NotFound();
+                    _logger.LogInformation("Alert with ID {AlertId} found.", id);
+                    var dto = new GetAlertByIdDto
+                    {
+                        AlertId = alert.AlertId,
+                        AlertStatusId = alert.AlertStatusId,
+                        AlertStatus = alert.AlertStatus?.DisplayName,
+
+                        CrimeDistrict = alert.CrimeDistrict,
+                        CrimeLocation = alert.CrimeLocation,
+                        CrimeDate = new CrimeDateDto
+                        {
+                            Date = alert.CrimeDate.ToString("dd.MM.yyyy"),
+                            Time = alert.CrimeTime.ToString(@"hh\:mm")
+                        },
+
+                        Victim = alert.Victim == null ? null : new GetAlertByIdVictimDto
+                        {
+                            VictimName = alert.Victim.VictimName,
+                            VictimAge = alert.Victim.VictimAge,
+                            VictimGender = alert.Victim.Gender.DisplayName,
+                            VictimSkinColor = alert.Victim.SkinColor.Name,
+                            VictimHair = alert.Victim.VictimHair,
+                            VictimClothing = alert.Victim.VictimClothing,
+                            VictimDistinctiveFeatures = alert.Victim.VictimDistinctiveFeatures,
+                            VictimPhoto = (alert.Victim.VictimPhoto?.Length > 0)
+                                                     ? Convert.ToBase64String(alert.Victim.VictimPhoto)
+                                                     : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
+                        },
+
+                        Abductor = alert.Abductor == null ? null : new GetAlertByIdAbductorDto
+                        {
+                            AbductorName = alert.Abductor.AbductorName,
+                            AbductorAge = alert.Abductor.AbductorAge,
+                            AbductorGender = alert.Abductor.Gender.DisplayName,
+                            AbductorSkinColor = alert.Abductor.SkinColor.Name,
+                            AbductorHair = alert.Abductor.AbductorHair,
+                            AbductorClothing = alert.Abductor.AbductorClothing,
+                            AbductorDistinctiveFeatures = alert.Abductor.AbductorDistinctiveFeatures,
+                            AbductorVehicle = alert.Abductor.AbductorVehicle,
+                            AbductorPhoto = (alert.Abductor.AbductorPhoto?.Length > 0)
+                                                     ? Convert.ToBase64String(alert.Abductor.AbductorPhoto)
+                                                     : Convert.ToBase64String(GetPlaceholderImageBytes("abductor"))
+                        }
+                    };
+                    dtoList.Add(dto);
+                }
+                else
+                {
+                    _logger.LogWarning("Alert with ID {AlertId} not found. Returning empty list.", id);
                 }
 
-                var dto = new GetAlertByIdDto
-                {
-                    AlertId = alert.AlertId,
-                    AlertStatusId = alert.AlertStatusId,
-                    AlertStatus = alert.AlertStatus?.DisplayName,
 
-                    CrimeDistrict = alert.CrimeDistrict,
-                    CrimeLocation = alert.CrimeLocation,
-                    CrimeDate = new CrimeDateDto
-                    {
-                        Date = alert.CrimeDate.ToString("dd.MM.yyyy"),
-                        Time = alert.CrimeTime.ToString(@"hh\:mm")
-                    },
-
-                    Victim = alert.Victim == null ? null : new GetAlertByIdVictimDto
-                    {
-                        VictimName = alert.Victim.VictimName,
-                        VictimAge = alert.Victim.VictimAge,
-                        VictimGender = alert.Victim.Gender.DisplayName,
-                        VictimSkinColor = alert.Victim.SkinColor.Name,
-                        VictimHair = alert.Victim.VictimHair,
-                        VictimClothing = alert.Victim.VictimClothing,
-                        VictimDistinctiveFeatures = alert.Victim.VictimDistinctiveFeatures,
-                        VictimPhoto = (alert.Victim.VictimPhoto?.Length > 0)
-                                                       ? Convert.ToBase64String(alert.Victim.VictimPhoto)
-                                                       : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
-                    },
-
-                    Abductor = alert.Abductor == null ? null : new GetAlertByIdAbductorDto
-                    {
-                        AbductorName = alert.Abductor.AbductorName,
-                        AbductorAge = alert.Abductor.AbductorAge,
-                        AbductorGender = alert.Abductor.Gender.DisplayName,
-                        AbductorSkinColor = alert.Abductor.SkinColor.Name,
-                        AbductorHair = alert.Abductor.AbductorHair,
-                        AbductorClothing = alert.Abductor.AbductorClothing,
-                        AbductorDistinctiveFeatures = alert.Abductor.AbductorDistinctiveFeatures,
-                        AbductorVehicle = alert.Abductor.AbductorVehicle,
-                        AbductorPhoto = (alert.Abductor.AbductorPhoto?.Length > 0)
-                                                       ? Convert.ToBase64String(alert.Abductor.AbductorPhoto)
-                                                       : Convert.ToBase64String(GetPlaceholderImageBytes("abductor"))
-                    }
-                };
-
-                _logger.LogInformation("Alert with ID {AlertId} retrieved successfully.", id);
-                return Ok(dto);
+                _logger.LogInformation("Returning {Count} alert(s) for ID {AlertId}.", dtoList.Count, id);
+                return Ok(dtoList);
             }
             catch (Exception ex)
             {

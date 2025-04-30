@@ -58,3 +58,4 @@ project.fragment.lock.json
 # Ignore appsettings and launchSettings files
 appsettings.json
 Properties/launchSettings.json
+/CodeVeronicaALRS.sln

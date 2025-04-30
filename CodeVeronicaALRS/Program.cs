@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Serilog.Settings.Configuration;
 using CodeVeronicaALRS.Middleware;
+using CodeVeronicaALRS.Messaging;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,8 @@ builder.Host.UseSerilog();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<AuditActionFilter>();
+builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
+
 
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
