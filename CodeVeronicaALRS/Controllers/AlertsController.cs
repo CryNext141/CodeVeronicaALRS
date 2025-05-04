@@ -5,6 +5,7 @@ using CodeVeronicaALRS.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Events;
 using System.Globalization;
 
@@ -430,6 +431,39 @@ namespace ALRS.Controllers
             {
                 _logger.LogError(ex, "An error occurred while closing alert with ID {AlertId}.", id);
                 return StatusCode(500, new { message = "An error occurred while closing the alert.", error = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet("alerts/lessDetailedAlerts")]
+        public async Task<IActionResult> GetLessDetailedAlerts()
+        {
+            _logger.LogInformation("Entering {Action} to get less detailed alerts", nameof(GetLessDetailedAlerts));
+
+            try
+            {
+                var alerts = await _context.Alert
+                    .Include(a => a.Victim)
+                    .ToListAsync();
+
+                var result = alerts.Select(a => new LessDetailedAlertDto
+                {
+                    AlertId = a.AlertId,
+                    CrimeDistrict = string.IsNullOrWhiteSpace(a.CrimeDistrict) ? "Unknown" : a.CrimeDistrict,
+                    CrimeDate = a.CrimeDate.ToString("dd.MM.yyyy"),
+                    VictimName = a.Victim?.VictimName ?? "Unknown",
+                    VictimPhoto = (a.Victim != null && a.Victim.VictimPhoto != null && a.Victim.VictimPhoto.Length > 0)
+                                    ? Convert.ToBase64String(a.Victim.VictimPhoto)
+                                    : Convert.ToBase64String(GetPlaceholderImageBytes("victim"))
+                }).ToList();
+
+                _logger.LogInformation("Retrieved {Count} less detailed alerts.", result.Count);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting less detailed alerts.");
+                return StatusCode(500, new { message = "An error occurred while getting less detailed alerts.", error = ex.Message });
             }
         }
 
