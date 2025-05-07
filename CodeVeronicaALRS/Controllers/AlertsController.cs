@@ -113,7 +113,7 @@ namespace ALRS.Controllers
                 var evt = new AlertCreatedEvent(
                     alert.AlertId,
                     alert.CrimeDistrict,
-                    $"New alert in {alert.CrimeDistrict}"
+                    $"Викрадено дитину в місті {alert.CrimeDistrict}"
                 );
                 _eventBus.Publish(evt, "alert.created");
 
@@ -443,6 +443,7 @@ namespace ALRS.Controllers
             try
             {
                 var alerts = await _context.Alert
+                    .Where(a => a.AlertStatusId == 1)
                     .Include(a => a.Victim)
                     .ToListAsync();
 
