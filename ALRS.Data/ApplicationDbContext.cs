@@ -45,9 +45,9 @@ namespace ALRS.Data
                new Gender { GenderId = 3, Code = "U", DisplayName = "Unknown" }
             );
             modelBuilder.Entity<SkinColor>().HasData(
-                new SkinColor { SkinColorId = 1, Name = "Light" },
-                new SkinColor { SkinColorId = 2, Name = "Medium" },
-                new SkinColor { SkinColorId = 3, Name = "Dark" },
+                new SkinColor { SkinColorId = 1, Name = "White" },
+                new SkinColor { SkinColorId = 2, Name = "Brown" },
+                new SkinColor { SkinColorId = 3, Name = "Black" },
                 new SkinColor { SkinColorId = 4, Name = "Unknown" }
             );
 
