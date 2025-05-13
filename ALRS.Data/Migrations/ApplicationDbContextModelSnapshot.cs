@@ -397,17 +397,17 @@ namespace ALRS.Data.Migrations
                         new
                         {
                             SkinColorId = 1,
-                            Name = "Light"
+                            Name = "White"
                         },
                         new
                         {
                             SkinColorId = 2,
-                            Name = "Medium"
+                            Name = "Brown"
                         },
                         new
                         {
                             SkinColorId = 3,
-                            Name = "Dark"
+                            Name = "Black"
                         },
                         new
                         {
