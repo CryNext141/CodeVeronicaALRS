@@ -424,6 +424,14 @@ namespace ALRS.Controllers
                 alert.AlertStatusId = 2;
                 await _context.SaveChangesAsync();
 
+                var closedEvent = new AlertClosedEvent(
+                alert.AlertId,
+                alert.CrimeDistrict,
+                $"Закрито сповіщення в місті {alert.CrimeDistrict}"
+                );
+
+                _eventBus.Publish(closedEvent, "alert.closed");
+
                 _logger.LogInformation("Alert with ID {AlertId} closed successfully.", id);
                 return Ok($"Alert with ID {alert.AlertId} successfuly closed, status {alert.AlertStatus}");
             }
